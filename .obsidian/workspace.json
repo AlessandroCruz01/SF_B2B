@@ -8,17 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "706973accc31a390",
+            "id": "cf75f108b63ba301",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "GetStarted.md",
+                "file": "docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-storefront-apis-parent.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "GetStarted"
+              "title": "b2b-d2c-comm-storefront-apis-parent"
             }
           }
         ]
@@ -33,7 +33,7 @@
       {
         "id": "a14a6f47c11b3339",
         "type": "tabs",
-        "dimension": 40.303030303030305,
+        "dimension": 53.4136546184739,
         "children": [
           {
             "id": "321436c1b86c1d2f",
@@ -85,7 +85,7 @@
       {
         "id": "55bf5b49af323af5",
         "type": "tabs",
-        "dimension": 35.15151515151515,
+        "dimension": 46.5863453815261,
         "children": [
           {
             "id": "b01d303f28020b4b",
@@ -129,23 +129,6 @@
             }
           }
         ]
-      },
-      {
-        "id": "d9e35cbf47d3d9be",
-        "type": "tabs",
-        "dimension": 24.545454545454547,
-        "children": [
-          {
-            "id": "5e7bf8e6058210e9",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
-            }
-          }
-        ]
       }
     ],
     "direction": "horizontal",
@@ -159,7 +142,7 @@
       {
         "id": "7c453b22d08e5832",
         "type": "tabs",
-        "dimension": 49.851190476190474,
+        "dimension": 59.523809523809526,
         "children": [
           {
             "id": "0fd6c6228aa2f7a8",
@@ -177,6 +160,39 @@
             }
           },
           {
+            "id": "923c690a8686afe6",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-storefront-apis-parent.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          },
+          {
+            "id": "5e7bf8e6058210e9",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ],
+        "currentTab": 2
+      },
+      {
+        "id": "e21768d44022484f",
+        "type": "tabs",
+        "dimension": 40.476190476190474,
+        "children": [
+          {
             "id": "2af8fccbe07e84c0",
             "type": "leaf",
             "state": {
@@ -191,29 +207,6 @@
             }
           },
           {
-            "id": "923c690a8686afe6",
-            "type": "leaf",
-            "state": {
-              "type": "outline",
-              "state": {
-                "file": "GetStarted.md",
-                "followCursor": false,
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-list",
-              "title": "Outline"
-            }
-          }
-        ],
-        "currentTab": 2
-      },
-      {
-        "id": "e21768d44022484f",
-        "type": "tabs",
-        "dimension": 50.148809523809526,
-        "children": [
-          {
             "id": "50060dc7db6f18b3",
             "type": "leaf",
             "state": {
@@ -223,11 +216,12 @@
               "title": "Calendar"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
-    "width": 406.5
+    "width": 285.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -244,22 +238,26 @@
       "pomodoro-timer:Toggle timer panel": false
     }
   },
-  "active": "706973accc31a390",
+  "active": "cf75f108b63ba301",
   "lastOpenFiles": [
-    "sfdx-project.json",
+    "docs/GetStarted.md",
+    "docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-storefront-apis-parent.md",
+    "docs/commerce/salesforce-commerce/guide",
+    "docs/commerce/salesforce-commerce",
+    "docs/commerce",
+    "GetStarted.md",
+    "docs/B2B-DataModel.md",
+    "docs",
+    "B2B-DataModel.md",
     "README.md",
+    "docs/commerce/salesforce-commerce/guide/b2b-b2c-dev-data-model.md",
+    "Untitled",
+    "sfdx-project.json",
     "manifest/package.xml",
     "manifest",
     "force-app/main/default/aura",
     "force-app/main/default/lwc",
-    "force-app/main/default",
-    "force-app/main",
-    "force-app",
-    "config/project-scratch-def.json",
-    "config",
-    "B2B/force-app/main/default/lwc",
     "B2B/README.md",
-    "GetStarted.md",
     "Salesforce/Salesforce Headless 360.md",
     "Pasted image 20260825145615.png",
     "Salesforce/data-model.md",
