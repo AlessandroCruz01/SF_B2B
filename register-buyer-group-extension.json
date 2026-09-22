@@ -1,0 +1,11 @@
+{
+    "name": "BuyerSegmentEvaluationService",
+    "epn": "Commerce_Domain_BuyerGroup_EvaluationService",
+    "type": "apexClass",
+    "description": "Dynamic Buyer Group evaluation based on BuyerSegment__c",
+    "isApplication": false,
+    "apexClass": {
+        "classId": "01pbm00000UjzdxAAB",
+        "className": "BuyerSegmentEvaluationService"
+    }
+}

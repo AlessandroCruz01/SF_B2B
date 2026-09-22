@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Maps a BuyerSegment__c code (e.g. GOLD, STANDARD) to the Id of the Buyer Group that buyers in that segment should be dynamically added to. Public visibility so it can be read from any execution context, including community/portal buyer users.</description>
+    <label>Buyer Segment Group Mapping</label>
+    <pluralLabel>Buyer Segment Group Mappings</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

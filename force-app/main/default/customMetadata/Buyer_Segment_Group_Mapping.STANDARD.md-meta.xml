@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" fullName="Buyer_Segment_Group_Mapping.STANDARD">
+    <label>STANDARD</label>
+    <protected>false</protected>
+    <values>
+        <field>Buyer_Group_Id__c</field>
+        <value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">0ZIbm000000CzkTGAS</value>
+    </values>
+</CustomMetadata>
