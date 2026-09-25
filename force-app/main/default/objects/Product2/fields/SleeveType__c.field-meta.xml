@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SleeveType__c</fullName>
+    <description>Tipo de manga da peça de roupa.</description>
+    <externalId>false</externalId>
+    <label>Tipo de Manga</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Sem Manga</fullName>
+                <default>false</default>
+                <label>Sem Manga</label>
+            </value>
+            <value>
+                <fullName>Manga Curta</fullName>
+                <default>false</default>
+                <label>Manga Curta</label>
+            </value>
+            <value>
+                <fullName>Manga Longa</fullName>
+                <default>false</default>
+                <label>Manga Longa</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

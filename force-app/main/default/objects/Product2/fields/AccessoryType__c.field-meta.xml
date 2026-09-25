@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AccessoryType__c</fullName>
+    <description>Tipo de acessório.</description>
+    <externalId>false</externalId>
+    <label>Tipo de Acessório</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Boné</fullName>
+                <default>false</default>
+                <label>Boné</label>
+            </value>
+            <value>
+                <fullName>Gorro</fullName>
+                <default>false</default>
+                <label>Gorro</label>
+            </value>
+            <value>
+                <fullName>Mochila</fullName>
+                <default>false</default>
+                <label>Mochila</label>
+            </value>
+            <value>
+                <fullName>Bolsa</fullName>
+                <default>false</default>
+                <label>Bolsa</label>
+            </value>
+            <value>
+                <fullName>Carteira</fullName>
+                <default>false</default>
+                <label>Carteira</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

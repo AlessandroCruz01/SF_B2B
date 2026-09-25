@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Franchise__c</fullName>
+    <label>Franquia</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Naruto</fullName>
+                <default>false</default>
+                <label>Naruto</label>
+            </value>
+            <value>
+                <fullName>Attack on Titan</fullName>
+                <default>false</default>
+                <label>Attack on Titan</label>
+            </value>
+            <value>
+                <fullName>86 - Eighty-Six</fullName>
+                <default>false</default>
+                <label>86 - Eighty-Six</label>
+            </value>
+            <value>
+                <fullName>Demon Slayer</fullName>
+                <default>false</default>
+                <label>Demon Slayer</label>
+            </value>
+            <value>
+                <fullName>Jujutsu Kaisen</fullName>
+                <default>false</default>
+                <label>Jujutsu Kaisen</label>
+            </value>
+            <value>
+                <fullName>One Piece</fullName>
+                <default>false</default>
+                <label>One Piece</label>
+            </value>
+            <value>
+                <fullName>Evangelion</fullName>
+                <default>false</default>
+                <label>Evangelion</label>
+            </value>
+            <value>
+                <fullName>Fullmetal Alchemist</fullName>
+                <default>false</default>
+                <label>Fullmetal Alchemist</label>
+            </value>
+            <value>
+                <fullName>Outros</fullName>
+                <default>false</default>
+                <label>Outros</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

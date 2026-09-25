@@ -71,10 +71,10 @@ A Salesforce fornece uma biblioteca de componentes **[Commerce LWR](https://deve
 
 ### 2. WebStore
 [**WebStore**](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-dev-data-model.html?utm_source=chatgpt.com) é o objeto que representa uma Commerce Store dentro do [modelo de dados do Salesforc](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-dev-data-model.html?utm_source=chatgpt.com)e. No data model oficial, o objeto responsável por representar a store é **`WebStore`**. Ele contém propriedades da loja, como idiomas, moedas e outras configurações.
-O WebStore funciona como uma referência central para vários recursos Commerce.![[mermaid-diagram (2).png]]
+O WebStore funciona como uma referência central para vários recursos Commerce.![[mermaid-diagram (2) 1.png]]
 
 ### 3. Experience Cloud
-[**Experience Cloud**](https://help.salesforce.com/s/articleView?id=commerce.comm_create_store_on_site.htm&type=5&utm_source=chatgpt.com) fornece o site através do qual os compradores externos acessam a B2B Commerce Store.![[mermaid-diagram (3).png]]
+[**Experience Cloud**](https://help.salesforce.com/s/articleView?id=commerce.comm_create_store_on_site.htm&type=5&utm_source=chatgpt.com) fornece o site através do qual os compradores externos acessam a B2B Commerce Store.![[mermaid-diagram (3) 1.png]]
 
 Para que serve:
 - acesso ao site;
@@ -98,7 +98,7 @@ B2B Store
 ### 5. Commerce Setup Assistant
 [**Commerce Setup Assistant**](https://help.salesforce.com/s/articleView?id=commerce.comm_quick_start.htm&type=5&utm_source=chatgpt.com) é o assistente guiado da Salesforce para preparar uma org para Commerce e auxiliar na criação inicial da store.
 
-![[mermaid-diagram (4).png]]
+![[mermaid-diagram (4) 1.png]]
 
 ### 6. Commerce Store
 A [**Commerce Store**](https://help.salesforce.com/s/articleView?id=000397155&language=en_US&type=1&utm_source=chatgpt.com) é a configuração administrativa da loja no [Commerce App](https://help.salesforce.com/s/articleView?id=000397155&language=en_US&type=1&utm_source=chatgpt.com). Ela centraliza recursos e configurações usados para construir e operar o storefront.
@@ -544,7 +544,7 @@ Product discovery
 
 Salesforce permite inclusive escolher uma **primary category**, utilizada para construir caminhos/breadcrumbs. Produtos podem pertencer a múltiplas categorias.
 
-![[mermaid-diagram.png]]
+![[mermaid-diagram 1.png]]
 
 ### ProductCategoryProduct
 Objeto:
@@ -586,7 +586,7 @@ Product Code
 ### O SKU será a ponte para Inventory
 Ainda não entraremos em OCI, mas esta conexão precisa estar clara desde já:
 
-![[mermaid-diagram (1).png]]
+![[mermaid-diagram (1) 1.png]]
 
 Primeiro construímos corretamente o produto e seu SKU. Depois a camada de inventory utilizará esse identificador para trabalhar com disponibilidade.
 
@@ -598,7 +598,7 @@ Agora entramos em uma estrutura muito importante. Salesforce B2B Commerce suport
 
 ### Buyer abre uma PLP
 Agora vamos entender o lado runtime.
-![[mermaid-diagram (2).png]]
+![[mermaid-diagram (2) 1.png]]
 
 ### Commerce Product APIs
 Salesforce possui **[APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-product-category-apis.html?utm_source=chatgpt.com)** específicas para Catalog, Products e Categories.
@@ -698,8 +698,8 @@ Commerce_Endpoint_Search_Suggestions
 ```
 
 ### Product lifecycle 
-![[mermaid-diagram (3).png]]
+![[mermaid-diagram (3) 1.png]]
 
 ### Arquitetura completa
-![[mermaid-diagram (4).png]]
+![[mermaid-diagram (4) 1.png]]
 

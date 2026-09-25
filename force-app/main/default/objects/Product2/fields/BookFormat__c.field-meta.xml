@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BookFormat__c</fullName>
+    <description>Formato do livro.</description>
+    <externalId>false</externalId>
+    <label>Formato do Livro</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Hardcover</fullName>
+                <default>false</default>
+                <label>Hardcover</label>
+            </value>
+            <value>
+                <fullName>Paperback</fullName>
+                <default>false</default>
+                <label>Paperback</label>
+            </value>
+            <value>
+                <fullName>Manga</fullName>
+                <default>false</default>
+                <label>Manga</label>
+            </value>
+            <value>
+                <fullName>Light Novel</fullName>
+                <default>false</default>
+                <label>Light Novel</label>
+            </value>
+            <value>
+                <fullName>Art Book</fullName>
+                <default>false</default>
+                <label>Art Book</label>
+            </value>
+            <value>
+                <fullName>Collector Edition</fullName>
+                <default>false</default>
+                <label>Collector Edition</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

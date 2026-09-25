@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>PrintType__c</fullName>
+    <description>Tipo de estampa da peça de roupa.</description>
+    <externalId>false</externalId>
+    <label>Tipo de Estampa</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Silk Screen</fullName>
+                <default>false</default>
+                <label>Silk Screen</label>
+            </value>
+            <value>
+                <fullName>Sublimação</fullName>
+                <default>false</default>
+                <label>Sublimação</label>
+            </value>
+            <value>
+                <fullName>Bordado</fullName>
+                <default>false</default>
+                <label>Bordado</label>
+            </value>
+            <value>
+                <fullName>Digital</fullName>
+                <default>false</default>
+                <label>Digital</label>
+            </value>
+            <value>
+                <fullName>Sem Estampa</fullName>
+                <default>false</default>
+                <label>Sem Estampa</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FitType__c</fullName>
+    <description>Modelagem da peça de roupa.</description>
+    <externalId>false</externalId>
+    <label>Modelagem</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Regular</fullName>
+                <default>false</default>
+                <label>Regular</label>
+            </value>
+            <value>
+                <fullName>Slim</fullName>
+                <default>false</default>
+                <label>Slim</label>
+            </value>
+            <value>
+                <fullName>Oversized</fullName>
+                <default>false</default>
+                <label>Oversized</label>
+            </value>
+            <value>
+                <fullName>Unissex</fullName>
+                <default>false</default>
+                <label>Unissex</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

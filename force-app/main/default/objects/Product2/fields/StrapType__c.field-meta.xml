@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>StrapType__c</fullName>
+    <description>Tipo de alça do acessório.</description>
+    <externalId>false</externalId>
+    <label>Tipo de Alça</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Sem Alça</fullName>
+                <default>false</default>
+                <label>Sem Alça</label>
+            </value>
+            <value>
+                <fullName>Alça de Ombro</fullName>
+                <default>false</default>
+                <label>Alça de Ombro</label>
+            </value>
+            <value>
+                <fullName>Alça Dupla</fullName>
+                <default>false</default>
+                <label>Alça Dupla</label>
+            </value>
+            <value>
+                <fullName>Alça Ajustável</fullName>
+                <default>false</default>
+                <label>Alça Ajustável</label>
+            </value>
+            <value>
+                <fullName>Alça de Mão</fullName>
+                <default>false</default>
+                <label>Alça de Mão</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

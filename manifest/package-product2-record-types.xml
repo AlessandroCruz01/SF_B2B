@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>Product2.AccessoriesDescription__c</members>
+        <members>Product2.AccessoryColor__c</members>
+        <members>Product2.AccessoryType__c</members>
+        <members>Product2.Adjustable__c</members>
+        <members>Product2.AgeRating__c</members>
+        <members>Product2.ArticulationPoints__c</members>
+        <members>Product2.ArticulationType__c</members>
+        <members>Product2.Author__c</members>
+        <members>Product2.BaseIncluded__c</members>
+        <members>Product2.BookEdition__c</members>
+        <members>Product2.BookFormat__c</members>
+        <members>Product2.BookLanguage__c</members>
+        <members>Product2.BookSeries__c</members>
+        <members>Product2.Capacity__c</members>
+        <members>Product2.CareInstructions__c</members>
+        <members>Product2.Character__c</members>
+        <members>Product2.ClosureType__c</members>
+        <members>Product2.ClothingType__c</members>
+        <members>Product2.Collection__c</members>
+        <members>Product2.Color__c</members>
+        <members>Product2.Compartments__c</members>
+        <members>Product2.CountryOfOrigin__c</members>
+        <members>Product2.DepthCm__c</members>
+        <members>Product2.Fabric__c</members>
+        <members>Product2.FigureEdition__c</members>
+        <members>Product2.FigureVersion__c</members>
+        <members>Product2.FitType__c</members>
+        <members>Product2.Franchise__c</members>
+        <members>Product2.HeightCm__c</members>
+        <members>Product2.ISBN__c</members>
+        <members>Product2.IncludesAccessories__c</members>
+        <members>Product2.LicensedProduct__c</members>
+        <members>Product2.LimitedEdition__c</members>
+        <members>Product2.Manufacturer__c</members>
+        <members>Product2.Material__c</members>
+        <members>Product2.PageCount__c</members>
+        <members>Product2.PoseType__c</members>
+        <members>Product2.PrintType__c</members>
+        <members>Product2.PublicationDate__c</members>
+        <members>Product2.Publisher__c</members>
+        <members>Product2.ReleaseDate__c</members>
+        <members>Product2.Scale__c</members>
+        <members>Product2.Size__c</members>
+        <members>Product2.SleeveType__c</members>
+        <members>Product2.StrapType__c</members>
+        <members>Product2.VolumeNumber__c</members>
+        <members>Product2.WaterResistant__c</members>
+        <members>Product2.WeightKg__c</members>
+        <members>Product2.WidthCm__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Product2-Action Figure Layout</members>
+        <members>Product2-Book Layout</members>
+        <members>Product2-Apparel Layout</members>
+        <members>Product2-Accessory Layout</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <members>Product2_Common_Fields_Access</members>
+        <members>Product2_ActionFigure_RT_Access</members>
+        <members>Product2_Book_RT_Access</members>
+        <members>Product2_Apparel_RT_Access</members>
+        <members>Product2_Accessory_RT_Access</members>
+        <name>PermissionSet</name>
+    </types>
+    <version>67.0</version>
+</Package>

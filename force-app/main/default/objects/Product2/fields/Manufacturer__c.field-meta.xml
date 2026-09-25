@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Manufacturer__c</fullName>
+    <label>Fabricante</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Bandai Spirits</fullName>
+                <default>false</default>
+                <label>Bandai Spirits</label>
+            </value>
+            <value>
+                <fullName>Good Smile Company</fullName>
+                <default>false</default>
+                <label>Good Smile Company</label>
+            </value>
+            <value>
+                <fullName>Kotobukiya</fullName>
+                <default>false</default>
+                <label>Kotobukiya</label>
+            </value>
+            <value>
+                <fullName>MegaHouse</fullName>
+                <default>false</default>
+                <label>MegaHouse</label>
+            </value>
+            <value>
+                <fullName>Alter</fullName>
+                <default>false</default>
+                <label>Alter</label>
+            </value>
+            <value>
+                <fullName>Nexus Select</fullName>
+                <default>false</default>
+                <label>Nexus Select</label>
+            </value>
+            <value>
+                <fullName>Outros</fullName>
+                <default>false</default>
+                <label>Outros</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

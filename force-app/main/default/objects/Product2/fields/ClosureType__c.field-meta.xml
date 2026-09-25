@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ClosureType__c</fullName>
+    <description>Tipo de fechamento do acessório.</description>
+    <externalId>false</externalId>
+    <label>Tipo de Fechamento</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Zíper</fullName>
+                <default>false</default>
+                <label>Zíper</label>
+            </value>
+            <value>
+                <fullName>Botão</fullName>
+                <default>false</default>
+                <label>Botão</label>
+            </value>
+            <value>
+                <fullName>Velcro</fullName>
+                <default>false</default>
+                <label>Velcro</label>
+            </value>
+            <value>
+                <fullName>Fivela</fullName>
+                <default>false</default>
+                <label>Fivela</label>
+            </value>
+            <value>
+                <fullName>Cordão</fullName>
+                <default>false</default>
+                <label>Cordão</label>
+            </value>
+            <value>
+                <fullName>Sem Fechamento</fullName>
+                <default>false</default>
+                <label>Sem Fechamento</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
