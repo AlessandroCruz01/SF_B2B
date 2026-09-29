@@ -103,13 +103,13 @@ B2B Store
 ### 6. Commerce Store
 A [**Commerce Store**](https://help.salesforce.com/s/articleView?id=000397155&language=en_US&type=1&utm_source=chatgpt.com) é a configuração administrativa da loja no [Commerce App](https://help.salesforce.com/s/articleView?id=000397155&language=en_US&type=1&utm_source=chatgpt.com). Ela centraliza recursos e configurações usados para construir e operar o storefront.
 
-![[mermaid-diagram (5).png]]
+![[certification/sources/mermaid-diagram (5).png]]
 
 ### 7. Website Design vs Experience Builder
 [**Website Design:**](https://help.salesforce.com/s/articleView?id=commerce.comm_customize_template.htm&language=en_US&type=5&utm_source=chatgpt.com) branding e estilos gerais.  
 [**Experience Builder:**](https://help.salesforce.com/s/articleView?id=sf.comm_experience_builder.htm&language=en_US&type=5&utm_source=chatgpt.com) estrutura, páginas e componentes do storefront.
 
-![[mermaid-diagram (6).png]]
+![[certification/sources/mermaid-diagram (6).png]]
 
 ### 8. Permissions e Store Access
 O acesso a uma B2B Store depende de Experience Cloud membership, licenses, profiles e permission sets.
@@ -125,7 +125,7 @@ Access funcional
 ### 9. Publish vs Activate
 **Publish** publica as alterações do storefront. **Activate** disponibiliza a store para compradores.
 
-![[mermaid-diagram (8).png]]
+![[certification/sources/mermaid-diagram (8).png]]
 
 ### Arquitetura da Phase 1
 ![[mermaid-diagram (9) 3.png]]
