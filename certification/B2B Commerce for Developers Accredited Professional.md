@@ -951,12 +951,12 @@ iterator
 >>Need first/last information?
 → iterator
 
-## 🗓️ Day 4 - 30/09 Basic LWC: `@api`, public properties, getters/setters
+## 🗓️ Day 5 - 30/09 Basic LWC: `@api`, public properties, getters/setters
 
 **`@api` and Public Properties**
 O `@api` define parte da [**public API** ](https://developer.salesforce.com/docs/platform/lwc/guide/reference-decorators?utm_source=chatgpt.com) de um Lightning Web Component. Quando uma property é marcada com `@api`, outro componente — normalmente o **parent/owner** — pode fornecer um valor para ela.
 
-#### 1. Private field vs Public property
+#### Private field vs Public property
 Sem `@api`:
 ```
 import { LightningElement } from 'lwc';
@@ -977,7 +977,7 @@ export default class ProductCard extends LightningElement {
 ```
 Agora `productName` faz parte da API pública do componente e pode receber dados de quem consome o componente. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reactivity-public.html?utm_source=chatgpt.com)
 
-#### 2. Parent → Child
+#### Parent → Child
 Imagine:
 ```
 productList
@@ -1010,7 +1010,7 @@ JavaScript usa **camelCase**; o atributo correspondente no HTML usa **kebab-case
 > buyerAccountId    →         buyer-account-id
 > productId               →         product-id
 
-#### 3. Mental model importante para a prova
+#### Mental model importante para a prova
 Pense em `@api` como uma **entrada pública controlada pelo owner**:
 ```
 Parent
@@ -1059,7 +1059,7 @@ O parent poderia fazer:
 
 O `buyerPricingCard` recebe essas informações, mas **não deve assumir ownership dos dados recebidos**.
 
-#### 4. `@api` precisa ser importado
+#### `@api` precisa ser importado
 Isto está correto:
 ```
 import { LightningElement, api } from 'lwc';
@@ -1080,7 +1080,7 @@ export default class BuyerCard extends LightningElement {
 
 O decorator deve ser importado do módulo `lwc`. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reactivity-public.html?utm_source=chatgpt.com)
 
-#### 5. Exam trap
+#### Exam trap
 Considere:
 ```
 export default class ProductCard extends LightningElement {
