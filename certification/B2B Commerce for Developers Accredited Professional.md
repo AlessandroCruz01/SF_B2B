@@ -487,3 +487,930 @@ As Commerce Pricing APIs seguem a mesma lógica: o preço é determinado a parti
 **Priority Price**
 > Which available Price Book has the highest configured priority?
 
+## 🗓️ Day 4 - 29/09  Basic LWC: LWC structure, HTML / JS / XML, fundamentals 
+**Topic:** LWC Structure, HTML, JavaScript & Metadata  
+**Goal:** entender exatamente a responsabilidade de cada arquivo de um Lightning Web Component e reconhecer a configuração correta em cenários de prova.
+
+![[mermaid-diagram (20).png]]
+
+### [Basic LWC](https://developer.salesforce.com/docs/platform/lwc/guide/create-components-define.html?utm_source=chatgpt.com)
+#### 1. LWC Component Bundle
+Um **UI Lightning Web Component** normalmente começa com estes três arquivos essenciais:
+- force-app/main/default/lwc/
+	└── productCard/
+	    ├── productCard.html
+	    ├── productCard.js
+	    └── productCard.js-meta.xml
+Para um componente que[ renderiza UI](https://developer.salesforce.com/docs/platform/lwc/guide/create-components-folder.html?utm_source=chatgpt.com), Salesforce documenta **HTML + JavaScript + configuration metadata** como parte do bundle básico. CSS, SVG, arquivos JS auxiliares e Jest tests são opcionais.
+
+A associação mental para a prova:
+
+| File           | Responsibility                                |
+| -------------- | --------------------------------------------- |
+| `.html`        | **UI / presentation**                         |
+| `.js`          | **logic / state / event handlers**            |
+| `.js-meta.xml` | Salesforce exposure / targets / configuration |
+| `.css`         | Styling — optional                            |
+
+#### 2. HTML — Presentation
+Exemplo:
+<template>
+    <lightning-card title="Product">
+        <p>{productName}</p>
+    </lightning-card>
+</template>
+<template>
+    <lightning-card title="Product">
+        <p>{productName}</p>
+    </lightning-card>
+</template>
+```
+<template>
+    <lightning-card title="Product">
+        <p>{productName}</p>
+    </lightning-card>
+</template>
+```
+
+Todo UI component usa `<template>` como root element. O template pode acessar dados definidos pela classe JavaScript usando expressions como `{productName}`
+Então:
+
+JavaScript
+productName = 'Astro Bot';
+        ↓ binding
+HTML
+{productName}
+        ↓
+Browser
+Astro Bot
+
+Um ponto importante:
+
+> **Evite pensar no HTML como local da business logic.**
+
+O template declara **o que será renderizado**.
+
+#### 3. JavaScript — Component Logic
+```
+import { LightningElement } from 'lwc';
+
+export default class ProductCard extends LightningElement {
+    productName = 'Astro Bot';
+}
+```
+
+A estrutura fundamental é:
+
+```
+import { LightningElement } from 'lwc';
+
+export default class MyComponent extends LightningElement {
+
+}
+```
+
+`LightningElement` vem do módulo `lwc`, e a classe do UI component estende `LightningElement`. O arquivo também pode conter fields, public APIs e event handlers. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/create-components-javascript.html?utm_source=chatgpt.com)
+
+Mental model:
+	HTML
+	    ↓
+	Presentation
+	
+	JavaScript
+	    ↓
+	Behavior + State + Logic
+
+#### 4. `.js-meta.xml` — Salesforce Configuration
+Agora vem uma diferença muito importante para prova.
+Imagine que seu componente existe corretamente:
+
+	productCard.html ✅
+	productCard.js   ✅
+
+Mas você precisa disponibilizá-lo no **Lightning App Builder** ou **Experience Builder**.
+Exemplo:
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+</LightningComponentBundle>
+```
+
+Interpretação:
+isExposed = true
+        ↓
+Component can be exposed for use
+
+targets
+        ↓
+WHERE the component can be used
+
+### Data Flow, `@api` & Events
+Agora saímos da estrutura de arquivos e entramos em **como os components se comunicam**.
+
+#### 1. Parent → Child: `@api`
+Quando um parent component precisa enviar informação para um child component, o child expõe uma [**public property**](https://developer.salesforce.com/docs/platform/lwc/guide/reactivity-public.html?utm_source=chatgpt.com) com `@api`. Salesforce define `@api` como parte da public API do component.
+
+***Child***:
+```
+import { LightningElement, api } from 'lwc';
+
+export default class ProductCard extends LightningElement {
+    @api productName;
+}
+```
+
+***Parent:***
+```
+<c-product-card
+    product-name="Astro Bot">
+</c-product-card>
+```
+
+> [!NOTE] Observe a conversão:
+> JavaScript
+productName
+>
+>HTML
+>product-name
+
+***Ou seja:*** *camelCase → kebab-case*
+
+![[certification/sources/mermaid-diagram (21).png]]
+
+> [!NOTE] Regra de prova:
+> `@api` → expose property or method publicly.
+> 
+> Ele também pode ser usado em **public methods**, permitindo que um parent chame um método do child.
+
+#### 2. Child → Parent: Events
+Agora o caminho inverso.
+Um child **não deve simplesmente alterar os dados que pertencem ao parent**.
+O padrão recomendado é:
+
+	Parent
+	   ↓ data
+	Child
+	
+	Child
+	   ↑ event
+	Parent
+
+A Salesforce recomenda **one-way data flow**: dados fluem do parent para o child; quando o child precisa comunicar uma mudança, ele dispara um event para o parent. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/create-components-data-flow.html?utm_source=chatgpt.com)
+Exemplo:
+
+***Child JS***
+```
+handleClick() {
+    this.dispatchEvent(
+        new CustomEvent('select')
+    );
+}
+```
+
+***Parent HTML***
+```
+<c-product-card
+    onselect={handleProductSelect}>
+</c-product-card>
+```
+
+***Parent JS***
+```
+handleProductSelect() {
+    // Handle the event
+}
+```
+
+![[certification/sources/mermaid-diagram (22).png]]
+
+> [!NOTE] Para prova:
+>>**Parent → Child = properties / `@api`**
+>
+>>**Child → Parent = events**
+
+#### 3. Event Handlers
+Para eventos padrão
+```
+<lightning-button
+    label="Add to Cart"
+    onclick={handleAddToCart}>
+</lightning-button>
+```
+
+JavaScript:
+```
+handleAddToCart() {
+    console.log('Added');
+}
+```
+
+O HTML declara **qual evento ouvir**:
+```
+onclick
+```
+
+O JavaScript contém:
+```
+handleAddToCart()
+```
+
+Salesforce recomenda declarative event listeners no template quando possível. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/events-handling?utm_source=chatgpt.com)
+
+#### 4. Reactivity
+Exemplo:
+```
+quantity = 1;
+
+handleIncrease() {
+    this.quantity++;
+}
+```
+
+HTML:
+```
+<p>Quantity: {quantity}</p>
+```
+
+Quando `quantity` muda, o component pode rerenderizar automaticamente porque o field usado pelo template é reactive. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reference-decorators?utm_source=chatgpt.com)
+
+***Pegadinha de material antigo***
+Você pode encontrar conteúdos dizendo:
+```
+@track quantity;
+```
+
+para qualquer field reactive.
+Isso está desatualizado.
+Hoje, fields do LWC já são reactive sem `@track` para mudanças normais de valor. `@track` ainda é relevante principalmente quando é necessário observar certas mudanças internas em **objects ou arrays**. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reference-decorators?utm_source=chatgpt.com)
+Portanto:
+```
+quantity = 1;
+```
+
+![[certification/sources/mermaid-diagram (23).png]]
+
+> [!NOTE] Nota Mental
+>> **`@api`**
+> → Public interface
+> → Parent communicates DOWN
+>
+>> ***Event***
+>→ Child communicates UP
+
+### Conditional Rendering & Lists
+Agora entramos em dois recursos básicos de template que aparecem bastante em LWC: **mostrar conteúdo condicionalmente** e **renderizar listas**.
+
+#### 1. Conditional Rendering
+Para código novo, prefira:
+```
+<template lwc:if={showProducts}>
+    <p>Products available</p>
+</template>
+```
+
+Também existem:
+```
+<template lwc:elseif={hasError}>
+    <p>Error loading products</p>
+</template>
+
+<template lwc:else>
+    <p>No products found</p>
+</template>
+```
+
+[Salesforce](https://developer.salesforce.com/docs/platform/lwc/guide/reference-directives.html?utm_source=chatgpt.com) atualmente recomenda `lwc:if`, `lwc:elseif` e `lwc:else`; os antigos `if:true` e `if:false` não são mais recomendados.
+Mental model:
+
+JavaScript boolean
+       ↓
+lwc:if
+       ↓
+Render / Don't render
+
+Exemplo:
+```
+showProducts = true;
+```
+
+HTML:
+```
+<template lwc:if={showProducts}>
+    <p>Product catalog</p>
+</template>
+```
+
+Se:
+```
+showProducts = false;
+```
+esse bloco não é renderizado.
+
+#### 2. Render Lists — `for:each`
+Imagine que temos:
+```
+products = [
+    { id: '1', name: 'Laptop' },
+    { id: '2', name: 'Monitor' },
+    { id: '3', name: 'Keyboard' }
+];
+```
+
+Podemos renderizar todos:
+```
+<template for:each={products} for:item="product">
+    <p key={product.id}>
+        {product.name}
+    </p>
+</template>
+```
+
+Aqui temos três partes importantes:
+```
+for:each={products}
+→ array being iterated
+
+for:item="product"
+→ variable representing current item
+
+key={product.id}
+→ unique identifier
+```
+
+Salesforce exige uma `key` única para cada item da lista. O framework usa essa key para identificar quais elementos mudaram e precisam ser renderizados novamente. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/create-lists.html?utm_source=chatgpt.com)
+
+#### 3. `key` — Important Exam Point
+Considere:
+```
+<template for:each={products} for:item="product">
+    <p key={product.id}>
+        {product.name}
+    </p>
+</template>
+```
+
+A melhor key normalmente é algo naturalmente único, como:
+```
+product.id
+record.Id
+contact.Id
+```
+
+Evite pensar assim:
+```
+key={index}
+```
+
+Salesforce especificamente documenta que **o index não pode ser usado como valor de `key`**. A key deve ser uma string ou number única e estável para cada item. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/create-lists.html?utm_source=chatgpt.com)
+Mental note:
+```
+GOOD
+key={product.id}
+
+BAD
+key={index}
+```
+
+#### 4. Why does `key` matter?
+Imagine:
+```
+Product A
+Product B
+Product C
+```
+
+Então Product B muda.
+Com keys únicas:
+```
+A → unchanged
+B → rerender
+C → unchanged
+```
+
+O framework consegue identificar especificamente o elemento alterado.
+Por isso:
+
+> **`key` = identity of the item during rendering**
+
+Não é simplesmente "um campo obrigatório porque Salesforce quer".
+
+#### 5. `iterator`
+Existe também:
+```
+<template iterator:product={products}>
+```
+
+O `iterator` é útil especialmente quando você precisa saber informações como:
+```
+first
+last
+index
+value
+```
+
+Por exemplo:
+```
+<template iterator:item={products}>
+    <div key={item.value.id}>
+        {item.value.name}
+    </div>
+</template>
+```
+
+O `iterator` disponibiliza propriedades como `value`, `index`, `first` e `last`. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/create-lists.html?utm_source=chatgpt.com)
+Para o nível deste bloco, pense:
+```
+for:each
+→ normal list iteration
+
+iterator
+→ iteration + first / last information
+```
+
+![[certification/sources/mermaid-diagram (24).png]]
+
+
+> [!NOTE] Para a prova
+>>Need conditional UI?
+>→ lwc:if
+>
+>>Need to display an array?
+>→ for:each
+>
+>>Need unique identity for repeated items?
+→ key
+>
+>>Need first/last information?
+→ iterator
+
+## 🗓️ Day 4 - 30/09 Basic LWC: `@api`, public properties, getters/setters
+
+**`@api` and Public Properties**
+O `@api` define parte da [**public API** ](https://developer.salesforce.com/docs/platform/lwc/guide/reference-decorators?utm_source=chatgpt.com) de um Lightning Web Component. Quando uma property é marcada com `@api`, outro componente — normalmente o **parent/owner** — pode fornecer um valor para ela.
+
+#### 1. Private field vs Public property
+Sem `@api`:
+```
+import { LightningElement } from 'lwc';
+
+export default class ProductCard extends LightningElement {
+    productName = 'Laptop';
+}
+```
+`productName` pertence internamente ao componente.
+
+Com `@api`:
+```
+import { LightningElement, api } from 'lwc';
+
+export default class ProductCard extends LightningElement {
+    @api productName;
+}
+```
+Agora `productName` faz parte da API pública do componente e pode receber dados de quem consome o componente. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reactivity-public.html?utm_source=chatgpt.com)
+
+#### 2. Parent → Child
+Imagine:
+```
+productList
+    ↓
+productCard
+```
+
+No ***child***:
+```
+// productCard.js
+import { LightningElement, api } from 'lwc';
+
+export default class ProductCard extends LightningElement {
+    @api productName;
+    @api price;
+}
+```
+
+No ***parent***:
+```
+<c-product-card
+    product-name={selectedProductName}
+    price={selectedPrice}>
+</c-product-card>
+```
+JavaScript usa **camelCase**; o atributo correspondente no HTML usa **kebab-case**. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reactivity-public.html?utm_source=chatgpt.com)
+> [!NOTE] Observe a conversão:
+> *JavaScript*         /                *HTML*
+> productName        →         product-name
+> buyerAccountId    →         buyer-account-id
+> productId               →         product-id
+
+#### 3. Mental model importante para a prova
+Pense em `@api` como uma **entrada pública controlada pelo owner**:
+```
+Parent
+   │
+   │ value
+   ▼
+@api property
+   │
+   ▼
+Child
+```
+
+Em LWC, o fluxo recomendado é **one-way data flow**:
+```
+DATA
+Parent ───────────────► Child
+         @api
+
+EVENT
+Parent ◄─────────────── Child
+        CustomEvent
+```
+
+Se o child precisar solicitar uma mudança em dados pertencentes ao parent, ele deve disparar um evento; o parent atualiza o dado e o novo valor volta para o child. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/create-components-data-flow.html?utm_source=chatgpt.com)
+
+***Exemplo B2B Commerce***
+```
+// buyerPricingCard.js
+import { LightningElement, api } from 'lwc';
+
+export default class BuyerPricingCard extends LightningElement {
+    @api buyerAccountId;
+    @api productId;
+    @api negotiatedPrice;
+}
+```
+
+O parent poderia fazer:
+```
+<c-buyer-pricing-card
+    buyer-account-id={buyerId}
+    product-id={selectedProductId}
+    negotiated-price={price}>
+</c-buyer-pricing-card>
+```
+
+O `buyerPricingCard` recebe essas informações, mas **não deve assumir ownership dos dados recebidos**.
+
+#### 4. `@api` precisa ser importado
+Isto está correto:
+```
+import { LightningElement, api } from 'lwc';
+
+export default class BuyerCard extends LightningElement {
+    @api buyerId;
+}
+```
+
+Isto não:
+```
+import { LightningElement } from 'lwc';
+
+export default class BuyerCard extends LightningElement {
+    @api buyerId;
+}
+```
+
+O decorator deve ser importado do módulo `lwc`. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reactivity-public.html?utm_source=chatgpt.com)
+
+#### 5. Exam trap
+Considere:
+```
+export default class ProductCard extends LightningElement {
+    productName;
+    @api productId;
+}
+```
+
+Temos duas properties, mas somente:
+```
+productId
+```
+é **public API**. `productName` continua sendo um field normal do componente.
+
+Isso não significa que `productName` não seja reactive. Em LWC moderno, fields são reactive para os casos comuns sem exigir `@track`; `@api` existe principalmente para definir a **public API**, não simplesmente para tornar um field reactive. [Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reference-decorators?utm_source=chatgpt.com)
+
+
+> [!NOTE] Nota Mental
+>> @api       → public property / public method
+>
+>>@wire      → Salesforce data / reactive provisioning
+>
+>> @track     → observação de mudanças internas em objetos/arrays em casos específicos
+
+---
+
+#### Getters
+Um **getter** permite calcular ou transformar um valor sempre que a propriedade é acessada.
+```
+import { LightningElement, api } from 'lwc';
+
+export default class ProductCard extends LightningElement {
+    @api productName;
+    @api price;
+
+    get displayName() {
+        return this.productName?.toUpperCase();
+    }
+}
+```
+
+***HTML***:
+```
+<p>{displayName}</p>
+```
+
+Se: `productName = 'Laptop';`
+o template exibirá: **LAPTOP**
+O ponto importante é que `displayName` **não precisa armazenar um estado separado**.
+Ele deriva seu valor de:
+```
+productName
+      ↓
+   getter
+      ↓
+displayName
+```
+
+##### Por que usar getter?
+Considere:
+```
+@api price;
+@api discount;
+```
+
+Você pode calcular:
+```
+get finalPrice() {
+    return this.price - this.discount;
+}
+```
+
+HTML:
+```
+<p>{finalPrice}</p>
+```
+
+Mental model:
+price ────────┐
+              ├──► getter finalPrice ───► Template
+discount ─────┘
+
+Isso evita manter: `finalPrice`, como outro estado que precisaria ser sincronizado manualmente.
+
+##### Getter com lógica condicional
+Exemplo B2B:
+```
+@api negotiatedPrice;
+@api listPrice;
+
+get hasNegotiatedPrice() {
+    return this.negotiatedPrice < this.listPrice;
+}
+```
+
+HTML:
+```
+<template lwc:if={hasNegotiatedPrice}>
+    <p>Special price available</p>
+</template>
+```
+
+Aqui o getter funciona muito bem porque transforma uma regra de negócio em um valor facilmente consumido pelo template.
+
+##### Exam trap — métodos no template
+Em LWC, você normalmente não chama funções com argumentos diretamente dentro de expressões do template.
+Evite pensar em algo assim:
+```
+<p>{calculatePrice(price, discount)}</p>
+```
+
+O padrão esperado é colocar essa lógica em JavaScript:
+```
+get finalPrice() {
+    return this.price - this.discount;
+}
+```
+
+e no template:
+```
+<p>{finalPrice}</p>
+```
+
+##### Getter usando `@api`
+Esse padrão aparece bastante:
+```
+@api buyerName;
+
+get formattedBuyerName() {
+    return `Buyer: ${this.buyerName}`;
+}
+```
+
+O fluxo fica:
+```
+Parent
+  │
+  ▼
+@api buyerName
+  │
+  ▼
+getter formattedBuyerName
+  │
+  ▼
+HTML
+```
+
+
+> [!NOTE] Regra de prova
+> Um getter é especialmente adequado para um valor:
+> 
+> **derived/computed from other component state.**
+
+#### Setters
+Um **setter** permite executar lógica quando um valor é atribuído a uma property.
+Exemplo:
+```
+import { LightningElement, api } from 'lwc';
+
+export default class ProductCard extends LightningElement {
+    _productName;
+
+    @api
+    get productName() {
+        return this._productName;
+    }
+
+    set productName(value) {
+        this._productName = value?.trim();
+    }
+}
+```
+
+O parent fornece:
+```
+<c-product-card
+    product-name={selectedProductName}>
+</c-product-card>
+```
+
+Quando o valor chega ao child:
+```
+Parent value
+    ↓
+setter productName(value)
+    ↓
+transform / validate
+    ↓
+_productName
+```
+
+##### 1. Backing field
+Observe:
+```
+_productName
+```
+
+> Esse campo é chamado de **backing field**.
+
+A ideia é evitar isto:
+```
+set productName(value) {
+    this.productName = value;
+}
+```
+
+Esse código tentaria atribuir novamente à própria property, chamando o setter outra vez e criando recursão.
+
+O padrão correto é:
+```
+_productName;
+
+set productName(value) {
+    this._productName = value;
+}
+```
+
+##### 2. Getter + Setter com `@api`
+Quando você cria uma public property usando getter/setter, normalmente o `@api` fica no **getter**:
+```
+_product;
+
+@api
+get product() {
+    return this._product;
+}
+
+set product(value) {
+    this._product = value;
+}
+```
+Isso transforma `product` em parte da public API do componente.
+
+##### 3. Por que usar setter?
+Um setter é útil quando o componente precisa:
+- normalize data
+- validate incoming data
+- transform incoming data
+- execute logic when a value changes
+Exemplo:
+```
+_price;
+
+@api
+get price() {
+    return this._price;
+}
+
+set price(value) {
+    this._price = Number(value);
+}
+```
+
+Agora, se o parent fornecer: `"120.50"`
+o componente pode armazenar: `120.50` como número.
+
+#####  4. Exemplo B2B Commerce
+```
+_buyerSegment;
+
+@api
+get buyerSegment() {
+    return this._buyerSegment;
+}
+
+set buyerSegment(value) {
+    this._buyerSegment = value?.toUpperCase();
+}
+```
+
+Se o parent passar:
+```
+gold
+```
+
+internamente o componente trabalha com:
+```
+GOLD
+```
+
+Fluxo:
+```
+Parent
+  │
+  │ "gold"
+  ▼
+setter
+  │
+  │ toUpperCase()
+  ▼
+"GOLD"
+```
+
+##### 5. Getter vs Setter
+Pense assim:
+```
+GETTER
+Component State
+      ↓
+ compute
+      ↓
+   output
+```
+
+```
+SETTER
+incoming value
+      ↓
+ transform / validate
+      ↓
+ internal state
+```
+
+###### Getter
+```
+get finalPrice() {
+    return this.price - this.discount;
+}
+```
+
+Pergunta:
+> "What value should I return?"
+
+###### Setter
+```
+set price(value) {
+    this._price = Number(value);
+}
+```
+
+Pergunta:
+> "What should I do when someone assigns a value?"
+

@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "a3f07c7533caeec6",
+        "id": "79357033fe0769d7",
         "type": "tabs",
         "children": [
           {
-            "id": "850c488358ed2e0e",
+            "id": "b9e36ca3ff196641",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -221,7 +221,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 339.5,
+    "width": 380.5,
     "collapsed": true
   },
   "left-ribbon": {
@@ -239,19 +239,19 @@
       "pomodoro-timer:Toggle timer panel": false
     }
   },
-  "active": "850c488358ed2e0e",
+  "active": "b9e36ca3ff196641",
   "lastOpenFiles": [
-    "certification/sources/mermaid-diagram (19).png",
+    "certification/sources/mermaid-diagram (24).png",
+    "certification/sources/mermaid-diagram (23).png",
+    "certification/sources/mermaid-diagram (20) 1.png",
     "certification/B2B Commerce for Developers Accredited Professional.md",
+    "certification/sources/mermaid-diagram (21).png",
+    "certification/sources/mermaid-diagram (22).png",
+    "certification/sources/mermaid-diagram (20).png",
+    "certification/sources/mermaid-diagram (19).png",
     "certification/sources/mermaid-diagram (18).png",
     "certification/sources/mermaid-diagram (17).png",
     "certification/sources/mermaid-diagram (16).png",
-    "certification/sources/mermaid-diagram (15).png",
-    "certification/sources/mermaid-diagram (14).png",
-    "certification/sources/mermaid-diagram (13).png",
-    "certification/sources/mermaid-diagram (12).png",
-    "certification/sources/mermaid-diagram (11) 1.png",
-    "certification/sources/mermaid-diagram (11).png",
     "docs/B2B Commerce.md",
     "certification/decks/Day_01_Exam_Scenario_Flashcards.csv",
     "certification/decks/Day_01_Key_Concepts_and_Limits.csv",
