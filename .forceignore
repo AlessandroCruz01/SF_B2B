@@ -1,2 +1,6 @@
 **/jsconfig.json
 **/.eslintrc.json
+**/*.ts
+**/tsconfig.json
+
+**/__tests__/**

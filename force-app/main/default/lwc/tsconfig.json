@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmitOnError": true
+  },
+  "include": [
+    "**/*.ts",
+    "../../../../.sfdx/typings/lwc/**/*.d.ts",
+    "../../../../types/**/*.d.ts"
+  ],
+  "exclude": [
+    "**/__tests__/**",
+    "../../../../.sfdx/typings/lwc/engine.d.ts"
+  ]
+}

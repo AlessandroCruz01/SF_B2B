@@ -1,0 +1,35 @@
+{
+  "name": "sf_b2b",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build:lwc": "tsc -p force-app/main/default/lwc",
+    "deploy": "npm run build:lwc && sf project deploy start -d force-app/main/default/lwc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlessandroCruz01/SF_B2B.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AlessandroCruz01/SF_B2B/issues"
+  },
+  "homepage": "https://github.com/AlessandroCruz01/SF_B2B#readme",
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
+    "@salesforce/lightning-types": "^0.10.1",
+    "@salesforce/sfdx-lwc-jest": "^7.9.0",
+    "@types/jest": "^30.0.0",
+    "lwc": "^9.4.3",
+    "typescript": "^7.0.2"
+  }
+}

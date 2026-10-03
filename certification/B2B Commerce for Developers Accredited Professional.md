@@ -1414,3 +1414,300 @@ set price(value) {
 Pergunta:
 > "What should I do when someone assigns a value?"
 
+
+#### Advanced Scenarios: Public API, Getters & Setters
+##### Scenario 1 — Dependent Public Properties
+A B2B Commerce storefront uses a reusable `productPricingCard` component.
+The parent provides two properties:
+```
+@api listPrice;
+@api negotiatedPrice;
+```
+
+O developer precisa calcular qual preço deve ser exibido.
+Armadilha: a ordem de atribuição entre diferentes `@api` properties não é garantida. Portanto, um setter não deve depender de outra public property já estar disponível.
+O padrão recomendado para valores derivados é:
+```
+@api listPrice;
+@api negotiatedPrice;
+
+get displayPrice() {
+    return this.negotiatedPrice ?? this.listPrice;
+}
+```
+O getter calcula o valor com base no estado disponível quando é acessado.
+
+##### Scenario 2 — Read-only Data from Parent
+Imagine que o parent passa um Product:
+```
+<c-product-card product={selectedProduct}>
+</c-product-card>
+```
+O child recebe:
+
+```
+@api product;
+```
+Se `product` for um objeto fornecido pelo parent, o child não deve modificar diretamente suas propriedades.
+Se precisar de uma cópia local para manipulação independente, pode utilizar spread syntax para uma shallow copy:
+
+```
+const localProduct = { ...this.product };
+```
+Essa operação copia apenas o primeiro nível do objeto. Objetos aninhados ainda compartilham referências.
+![[mermaid-diagram (25).png]]
+
+## 🗓️ Day 6 - 01/10 Basic LWC: Component communication & Custom Events
+
+> [!INFO] Objetivos de aprendizagem
+> **Ao concluir o conteúdo de hoje, você deverá conseguir:**
+> > Distinguir Parent-to-Child, Child-to-Parent e Sibling Communication
+> 
+> >Implementar `@api` public properties e public methods.
+> 
+> >Criar e tratar `CustomEvent`, utilizando `event.detail`.
+> 
+> >Entender `bubbles`, `composed` e `event.target`.
+> 
+> >Escolher a estratégia adequada de comunicação em um LWR Storefront.
+
+### 1. Component Communication
+O LWC utiliza um modelo de fluxo unidirecional: properties down, events up.
+
+| Direction            | Mechanism                 | Purpose                                          |
+| -------------------- | ------------------------- | ------------------------------------------------ |
+| Parent → Child       | `@api` property           | Passar dados                                     |
+| Parent → Child       | `@api` method             | Invocar comportamento                            |
+| Child → Parent       | CustomEvent               | Comunicar ações ou mudanças                      |
+| Sibling → Sibling    | Common Parent             | Compartilhar atualizações                        |
+| Unrelated Components | Lightning Message Service | Comunicação desacoplada em ambientes compatíveis |
+
+![[mermaid-diagram (26).png]]
+
+> **Regra arquitetural**: ***componentes irmãos não precisam se conhecer diretamente. O componente responsável pelo estado coordena as atualizações.***
+
+### 2. Implementando Custom Events em um B2B Storefront
+#### Business Requirement
+Uma loja B2B possui dois componentes independentes dentro do mesmo Parent:
+- `categoryFilter`: permite selecionar uma categoria.
+- `productResults`: exibe os produtos associados à categoria selecionada.
+Quando o comprador altera a categoria, os produtos exibidos devem ser atualizados.
+##### Step 1 — Child: categoryFilter.js
+```
+import { LightningElement, api } from 'lwc';
+
+export default class CategoryFilter extends LightningElement {
+    @api selectedCategoryId = 'all';
+
+    categoryOptions = [
+        { label: 'All Products', value: 'all' },
+        { label: 'Hardware', value: 'hardware' },
+        { label: 'Software', value: 'software' }
+    ];
+
+    handleChange(event) {
+        const categoryId = event.detail.value;
+
+        this.dispatchEvent(
+            new CustomEvent('categorychange', {
+                detail: { categoryId }
+            })
+        );
+    }
+}
+```
+
+##### Step 2 — Child: categoryFilter.html
+```
+<template>
+    <lightning-combobox
+        label="Product Category"
+        value={selectedCategoryId}
+        options={categoryOptions}
+        onchange={handleChange}>
+    </lightning-combobox>
+</template>
+```
+
+
+> [!NOTE] Pontos importantes:
+>> `new CustomEvent()` cria o evento; `this.dispatchEvent()` o dispara; `detail` transporta os dados.
+> 
+>>O nome `categorychange` não recebe o prefixo `on` na declaração. O prefixo aparece no listener HTML: `oncategorychange`
+
+##### Step 3 — Parent Component
+> `storefrontContainer.html`
+```
+<template>
+    <c-category-filter
+        selected-category-id={selectedCategoryId}
+        oncategorychange={handleCategoryChange}>
+    </c-category-filter>
+
+    <c-product-results
+        selected-category-id={selectedCategoryId}>
+    </c-product-results>
+</template>
+```
+
+> `storefrontContainer.js`
+```
+import { LightningElement } from 'lwc';
+
+export default class StorefrontContainer
+    extends LightningElement {
+
+    selectedCategoryId = 'all';
+
+    handleCategoryChange(event) {
+        this.selectedCategoryId =
+            event.detail.categoryId;
+    }
+}
+```
+
+##### Step 4 — Receiving Child
+> `productResults.js`
+```
+import { LightningElement, api } from 'lwc';
+
+export default class ProductResults extends LightningElement {
+    @api selectedCategoryId = 'all';
+
+    products = [
+        { id: 'P1', name: 'Laptop', categoryId: 'hardware' },
+        { id: 'P2', name: 'CRM License', categoryId: 'software' },
+        { id: 'P3', name: 'Keyboard', categoryId: 'hardware' }
+    ];
+
+    get filteredProducts() {
+        if (this.selectedCategoryId === 'all') {
+            return this.products;
+        }
+
+        return this.products.filter(
+            product =>
+                product.categoryId === this.selectedCategoryId
+        );
+    }
+}
+```
+
+> `productResults.html`
+```
+<template>
+    <template for:each={filteredProducts}
+              for:item="product">
+        <p key={product.id}>
+            {product.name}
+        </p>
+    </template>
+</template>
+```
+
+O Parent mantém o estado e o segundo Child recebe a atualização por meio de uma public property. O getter recalcula a lista filtrada quando a propriedade reativa utilizada no template muda.
+Na loja real, este exemplo não substituiria as verificações de acesso, Entitlement Policies ou os Commerce APIs responsáveis por fornecer os produtos permitidos para o comprador.
+
+### 3. Parent-to-Child — Public Methods
+Além de propriedades, o Parent pode chamar métodos do Child usando `@api`.
+Exemplo: limpar os filtros de um componente.
+
+##### Child — categoryFilter.js (trecho)
+```
+@api
+resetFilters() {
+    this.dispatchEvent(
+        new CustomEvent('categorychange', {
+            detail: { categoryId: 'all' }
+        })
+    );
+}
+```
+
+##### Parent — storefrontContainer.js (trecho)
+```
+handleReset() {
+    const child = this.template.querySelector(
+        'c-category-filter'
+    );
+
+    child?.resetFilters();
+}
+```
+
+O Parent invoca um método público no Child, que solicita a atualização do estado por meio de um evento. Assim, a propriedade controlada pelo Parent continua sendo a fonte de verdade. [Salesforce](https://developer.salesforce.com/docs/platform/lwc/guide/create-javascript-methods.html)
+
+### 4. Event Propagation & Shadow DOM
+Por padrão, um `CustomEvent` possui estas configurações:
+
+```
+new CustomEvent('productselected', {
+    detail: { productId: 'P1' },
+    bubbles: false,
+    composed: false
+});
+```
+
+|Property|Default|Responsibility|
+|---|---|---|
+|`bubbles`|`false`|Permitir que o evento suba pela árvore DOM|
+|`composed`|`false`|Permitir que o evento atravesse uma Shadow DOM boundary|
+
+Quando usamos `this.dispatchEvent()` no Child, o evento é disparado no host do componente. O Parent pode recebê-lo com um listener diretamente nesse host, mesmo sem bubbling.
+Por outro lado, um evento disparado em um elemento interno do template pode exigir configuração adicional para alcançar listeners fora desse template. A Salesforce recomenda utilizar a configuração de propagação mais restritiva possível. [Salesforce](https://developer.salesforce.com/docs/platform/lwc/guide/events-propagation.html)
+
+##### Event Retargeting
+Ao atravessar uma Shadow DOM boundary, `event.target` pode ser alterado para preservar o encapsulamento.
+
+Por isso:
+- `event.target`: elemento identificado como origem do evento no contexto do listener.
+- `event.currentTarget`: elemento em que o listener está registrado.
+- `event.detail`: payload explícito transportado pelo `CustomEvent`.
+
+Para dados de negócio, como `productId`, prefira o uso de `event.detail` com valores primitivos ou cópias independentes de objetos. [Salesforce](https://developer.salesforce.com/docs/platform/lwc/guide/events-best-practices)
+
+### 5. Lightning Message Service — Quando utilizar?
+Quando componentes não compartilham uma relação direta de Parent/Child, considere Lightning Message Service (LMS).
+Em ambientes compatíveis, como Lightning Experience e componentes Lightning em LWR Experience Builder Sites, LMS permite comunicação através de **[Lightning Message Channels](https://developer.salesforce.com/docs/platform/lwc/guide/use-message-channel)**
+O mecanismo é diferente de `CustomEvent`: em vez de percorrer a hierarquia de componentes, uma mensagem é publicada em um canal e recebida por seus subscribers.
+
+### 6. Knowledge Check — Exam Decision Rules
+| Business Requirement                   | Expected Solution                                    |
+| -------------------------------------- | ---------------------------------------------------- |
+| Parent sends a buyerId to Child        | `@api` property                                      |
+| Parent invokes a Child operation       | `@api` public method                                 |
+| Child reports a product selection      | `CustomEvent`                                        |
+| Child sends productId                  | `event.detail`                                       |
+| Two siblings share a selection         | Common Parent                                        |
+| Unrelated components exchange messages | Lightning Message Service, when supported            |
+| Event should remain locally scoped     | `bubbles: false`, `composed: false`, when sufficient |
+### 7. Practical Lab — B2B Product Carousel
+Construiremos três Lightning Web Components:
+![[mermaid-diagram (27).png]]
+
+|Component|Responsibility|
+|---|---|
+|`productCarousel`|Gerenciar produtos, posição atual e seleção|
+|`productCarouselCard`|Exibir informações de um produto e emitir `productselect`|
+|`carouselControls`|Navegar entre produtos emitindo `previous` e `next`|
+
+#### Step 1 — Estrutura dos componentes
+force-app/main/default/lwc/
+│
+├── productCarousel/
+│   ├── productCarousel.html
+│   ├── productCarousel.js
+│   ├── productCarousel.css
+│   └── productCarousel.js-meta.xml
+│
+├── productCarouselCard/
+│   ├── productCarouselCard.html
+│   ├── productCarouselCard.js
+│   ├── productCarouselCard.css
+│   └── productCarouselCard.js-meta.xml
+│
+└── carouselControls/
+    ├── carouselControls.html
+    ├── carouselControls.js
+    └── carouselControls.js-meta.xml
+
