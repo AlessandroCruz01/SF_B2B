@@ -19,6 +19,7 @@
                  name="categoryId"
                  type="String"
                  label="ID da Categoria"
+                 default="0ZGbm0000019GeTGAU"
              />
          </targetConfig>
     </targetConfigs>

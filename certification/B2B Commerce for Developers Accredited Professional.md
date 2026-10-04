@@ -1711,3 +1711,4 @@ force-app/main/default/lwc/
     ├── carouselControls.js
     └── carouselControls.js-meta.xml
 
+## 🗓️ Day 6 - 01/10 Basic LWC: Component communication & Custom Events

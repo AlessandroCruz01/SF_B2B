@@ -14,6 +14,7 @@
   ],
   "exclude": [
     "**/__tests__/**",
-    "../../../../.sfdx/typings/lwc/engine.d.ts"
+    "../../../../.sfdx/typings/lwc/engine.d.ts",
+    "../../../../.sfdx/typings/lwc/apex/**"
   ]
 }
