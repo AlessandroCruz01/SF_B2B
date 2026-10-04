@@ -1497,7 +1497,7 @@ Quando o comprador altera a categoria, os produtos exibidos devem ser atualizado
 import { LightningElement, api } from 'lwc';
 
 export default class CategoryFilter extends LightningElement {
-    @api selectedCategoryId = 'all';
+	    @api selectedCategoryId = 'all';
 
     categoryOptions = [
         { label: 'All Products', value: 'all' },

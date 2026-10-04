@@ -2,17 +2,25 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>67.0</apiVersion>
     <isExposed>true</isExposed>
-    <masterLabel>Carrossel de Produtos</masterLabel>
+    <masterLabel>Card de Produto</masterLabel>
     <targets>
         <target>lightningCommunity__Page</target>
         <target>lightningCommunity__Default</target>
     </targets>
     <targetConfigs>
-        <property
-            name="enableLogging"
-            type="Boolean"
-            label="Habilitar logs de debug"
-            default="false"
-        />
+         <targetConfig targets="lightningCommunity__Default">
+             <property
+                 name="enableLogging"
+                 type="Boolean"
+                 label="Habilitar logs de debug"
+                 default="false"
+             />
+             <property
+                 name="recordId"
+                 type="String"
+                 label="ID do Produto"
+                 default="{!recordId}"
+             />
+         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
