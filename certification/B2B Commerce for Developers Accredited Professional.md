@@ -1711,4 +1711,67 @@ force-app/main/default/lwc/
     ├── carouselControls.js
     └── carouselControls.js-meta.xml
 
-## 🗓️ Day 6 - 01/10 Basic LWC: Component communication & Custom Events
+## 🗓️ Day 7 - 02/10 Basic LWC: Wire Adapters vs Imperative Operations
+### Core Architecture Decisions
+
+> When should an LWC retrieve data reactively using `@wire`, and when should it execute an imperative operation?
+
+| Feature             | `@wire`                          | Imperative                                                 |
+| ------------------- | -------------------------------- | ---------------------------------------------------------- |
+| Execution           | Framework-managed, reactive      | Explicitly invoked                                         |
+| Typical purpose     | Read data and respond to changes | User-triggered actions, reads or mutations                 |
+| Return model        | Stream of provisioned values     | Promise for asynchronous APIs                              |
+| Reactive parameters | `$propertyName`                  | Pass parameters when invoking                              |
+| Apex requirement    | `@AuraEnabled(cacheable=true)`   | `@AuraEnabled`; <br>caching optional for read-only methods |
+| DML through Apex    | Not allowed                      | Supported                                                  |
+| Commerce example    | `CartSummaryAdapter`             | `addItemToCart()`                                          |
+
+Apex calls and Commerce Storefront APIs have their own caching and refresh behavior. `@wire` does not guarantee that every backend change will trigger a new fetch.
+
+#### The Salesforce decision model
+![[mermaid-diagram.png]]
+
+Prefer standard Salesforce APIs over custom Apex when they satisfy the requirement. In Commerce, Storefront APIs also handle buyer context and integrate with Storefront State Management.
+
+#### Practical examples — Nexus Figures
+*Example A — Reactive reading of cart totals:* The adapter provides current cart summary data, and Commerce State Management coordinates updates to subscribed components.
+```
+import { LightningElement, wire } from 'lwc';
+import { CartSummaryAdapter } from 'commerce/cartApi';
+
+export default class CartSummaryViewer extends LightningElement {
+    @wire(CartSummaryAdapter)
+    cartSummary;
+}
+```
+
+*Example B — Buyer adds a product*: Here, `addItemToCart()` is an imperative Commerce API triggered by user interaction. Both APIs are officially supported in B2B Commerce.
+```
+import { LightningElement, api } from 'lwc';
+import { addItemToCart } from 'commerce/cartApi';
+
+export default class ProductCartButton extends LightningElement {
+    @api productId;
+
+    async handleAddToCart() {
+        try {
+            await addItemToCart(this.productId, 1);
+        } catch (error) {
+            console.error('Add to cart failed', error);
+        }
+    }
+}
+```
+
+
+> [!NOTE] Important exam traps
+>> `@wire` isn't exclusively for Apex; Salesforce provides UI API and Commerce Wire Adapters.
+>
+>>`@wire` with Apex requires `cacheable=true`, which prohibits data mutations.
+>
+>>An imperative Apex method can also be `cacheable=true` when it is read-only.
+>
+>>Use `refreshApex()` for Apex-wired data, not for the result of an imperative Apex invocation.
+>
+>>When imperative Apex changes records used by LDS, `notifyRecordUpdateAvailable()` can refresh affected LDS-managed record data.
+

@@ -2,7 +2,8 @@
     <div class="container">
         <div>
             <template for:each={products} for:item="product">
-                <c-b2b-product-card key={product.id} product={product}></c-b2b-product-card>
+                <h1 key={product.id}>{product.name}</h1>
+                <c-b2b-product-card key={product.id} product={product} enable-logging={enableLogging}></c-b2b-product-card>
             </template>
         </div>
     </div>

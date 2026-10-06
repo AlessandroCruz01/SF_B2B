@@ -1,4 +1,4 @@
-public virtual class B2BProduct2Repository {
+public virtual with sharing class B2BProduct2Repository {
     public virtual ConnectApi.ProductSearchResults findProductsByCategory(
         String webstoreId, 
         String effectiveAccountId, 

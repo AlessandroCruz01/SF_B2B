@@ -9,24 +9,28 @@ interface Products {
   imageUrl: string;
   sku: string;
 }
-
 export default class B2bProductCarousel extends LightningElement {
   @api categoryId?: string;
   @api effectiveAccountId?: string;
-  @api enableLogging: boolean = false;
+  @api enableLogging?: boolean;
 
   _products?: Products[];
   error?: string;
 
+  connectedCallback(): void {
+    this.loadProducts();
+  }
+
   async loadProducts() {
     try {
       this.effectiveAccountId = effectiveAccount?.accountId;
-      const data = await getProductsByCategory({
+      //? O Apex retorna JSON.serialize(...): precisa de parse para virar array
+      const data: string = await getProductsByCategory({
         categoryId: this.categoryId,
         effectiveAccountId: this.effectiveAccountId,
       });
-      this._products = data;
-      this.log('Products loaded successfully');
+      this._products = JSON.parse(data) as Products[];
+      this.log('Products loaded successfully' + (this._products ? ` (${this._products.length} products)` : ''));
     } catch (error) {
       this.error = 'Error occurred while loading products';
       this.log('Error occurred while loading products');
