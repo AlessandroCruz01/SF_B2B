@@ -1843,26 +1843,197 @@ export default class ProductCarousel extends LightningElement {
 
 ---
 
-## 🧠 Revisão Final — Decision Rules
+## 🗓️ Day 9 (05/10) — Basic LWC: Commerce-specific LWC Fundamentals
+Hoje começamos a parte em que LWC deixa de ser apenas “Lightning Web Components” e passa a operar dentro da arquitetura específica do **Salesforce B2B Commerce LWR storefront**.
 
-| Se o cenário pede...                                       | Resposta                                           |
-| ---------------------------------------------------------- | -------------------------------------------------- |
-| Coleção centralizada de produtos para a Store              | `ProductCatalog` (1 Store → 1 Catalog)             |
-| Organizar produtos para navegação                          | `ProductCategory` (até 5 levels)                   |
-| Associar Product ↔ Category                                | `ProductCategoryProduct`                           |
-| Controlar quais produtos/preços um segmento vê             | `CommerceEntitlementPolicy` (`CanViewProduct` / `CanViewPrice`) |
-| Preço amplo para todos da Store                            | Store Price Book (`WebStorePricebook`)             |
-| Preço negociado por segmento                               | Buyer Group Price Book (`BuyerGroupPricebook`)     |
-| Preço de um produto específico em um Price Book            | `PricebookEntry`                                   |
-| Produto em custom Price Book                               | Precisa existir antes no **Standard Price Book**   |
-| Exibir o menor preço aplicável                             | **Best Price**                                     |
-| Exibir o preço do Price Book mais importante               | **Priority Price** (menor número = maior prioridade) |
-| Parent envia dados ao Child                                | `@api` property                                    |
-| Child avisa o Parent                                       | `CustomEvent` + `event.detail`                     |
-| Valor derivado de outros estados                           | Getter                                             |
-| Normalizar/validar valor recebido                          | Setter + backing field (`_prop`)                   |
-| Componentes sem relação Parent/Child                       | Lightning Message Service                          |
-| Leitura reativa de dados                                   | `@wire` (UI API / Commerce Adapter / Apex `cacheable=true`) |
-| Ação do usuário ou mutação (DML)                           | Imperative API / Apex                              |
-| Colocar componente no Experience Builder                   | `isExposed=true` + `lightningCommunity__Page`      |
-| Propriedades editáveis pelo merchant                       | `lightningCommunity__Default` + `targetConfigs` + `@api` |
+### 1. Custom LWC dentro do B2B Commerce
+Em uma loja B2B baseada em **LWR**, um custom LWC continua usando:
+
+- HTML → presentation
+- JavaScript → state, events e business logic
+- CSS → styling
+- `js-meta.xml` → exposure/configuration
+
+A diferença é que o componente normalmente precisa consumir dados e executar operações específicas de Commerce.
+
+Salesforce fornece as chamadas **Storefront APIs** justamente para isso. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
+Exemplos:
+
+```javascript
+import { CartSummaryAdapter } from 'commerce/cartApi';
+import { ProductSearchAdapter } from 'commerce/productApi';
+```
+
+Essas APIs são preferíveis a implementar manualmente toda a comunicação com REST/Apex quando a funcionalidade já existe na storefront API.
+
+### 2. Storefront APIs
+As **Storefront APIs** fornecem uma camada especializada para custom LWCs interagirem com o storefront.
+Existem três conceitos que você precisa reconhecer para a prova:
+
+**Wire Adapters**  
+→ leitura reativa de dados.
+
+**Imperative APIs**  
+→ operação explicitamente disparada pelo JavaScript.
+
+**Storefront Actions**  
+→ ações que participam do state management do storefront.
+
+Salesforce destaca vantagens como:
+- buyer entitlement enforcement
+- caching
+- performance/scalability
+- Commerce business logic
+- reactive storefront state
+- synchronization entre componentes [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
+
+![[mermaid-diagram.png]]
+
+Esse **State Management layer** é importante.
+Suponha:
+
+Product Card
+    ↓
+Add Product
+    ↓
+Cart State changes
+    ↓
+Cart Badge updates
+
+Você não deveria ter que construir manualmente uma cadeia de eventos entre todos os componentes do storefront para sincronizar esse estado. A camada Commerce coordena essas atualizações. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
+
+### 3. Commerce namespaces
+No exame, não memorize dezenas de adapters isoladamente. Primeiro reconheça o domínio pelo namespace.
+Exemplos importantes:
+
+```javascript
+commerce/productApi
+commerce/cartApi
+commerce/wishlistApi
+commerce/checkoutApi
+```
+
+Cada namespace agrupa capacidades relacionadas.
+Por exemplo, em `commerce/cartApi`, Salesforce disponibiliza adapters como:
+
+```javascript
+CartAdapter
+CartItemsAdapter
+CartSummaryAdapter
+CartCouponsAdapter
+CartPromotionsAdapter
+```
+
+Cada um resolve um tipo específico de storefront state.
+
+### 4. Por que não usar Apex para tudo?
+Considere:
+
+> A custom cart badge needs to display the current number of products in the buyer's cart.
+
+Você poderia pensar:
+
+LWC
+ ↓
+Apex
+ ↓
+SOQL / ConnectApi / REST
+ ↓
+WebCart
+
+Mas se existe um Storefront API adequado, isso normalmente não é a melhor arquitetura.
+Prefira:
+
+LWC
+ ↓
+commerce/cartApi
+ ↓
+Commerce State Management
+ ↓
+Current Cart
+
+Porque a Storefront API já foi projetada para:
+
+- storefront context
+- caching
+- Commerce security
+- buyer-specific behavior
+- reactivity
+
+Esse é exatamente o tipo de decisão arquitetural que pode aparecer na certificação. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
+
+### 5. Buyer context importa
+Em B2B Commerce, obter um produto não significa simplesmente consultar:
+```sql
+SELECT Id, Name FROM Product2
+```
+
+A storefront pode precisar considerar:
+Buyer
+  ↓
+Buyer Account
+  ↓
+Buyer Group
+  ↓
+Entitlement Policy
+  ↓
+Catalog
+  ↓
+Price Book
+  ↓
+Product availability + pricing
+
+Isso conecta diretamente o conteúdo de LWC com o que estudamos nos **Days 1–3**.
+
+Por isso Salesforce destaca que Storefront APIs podem aplicar automaticamente guardrails como **buyer entitlement** e agregar dados provenientes de catalogs, price books e outras fontes Commerce.
+
+![[mermaid-diagram (1) 2.png]]
+
+### 6. O conceito mais importante deste primeiro bloco
+Para a certificação, grave:
+
+> Custom Commerce LWC should use Commerce Storefront APIs when Salesforce already provides the required storefront capability.
+
+Não pense inicialmente:
+> “Como faço isso com Apex?”
+
+Pense:
+> “Does Commerce already provide an API, adapter, or action for this?”
+
+É a mesma mentalidade Salesforce de **use the platform capability before creating custom infrastructure**.
+
+Outro recurso oficial útil é a **Public Commerce LWR Library**, que contém reference LWCs semelhantes aos componentes disponíveis no Experience Builder e pode ser usada como base para custom storefront development. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-public-lwr-library.html?utm_source=chatgpt.com)
+
+### Wire Adapters vs Imperative APIs vs Storefront Actions
+Agora entramos na distinção mais importante das **Storefront APIs**. Em B2B Commerce LWR, Salesforce fornece três mecanismos principais para conectar custom LWCs ao storefront: **Wire Adapters, Imperative APIs e Storefront Actions**. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
+
+#### 1. Wire Adapters — reactive reads
+Use **Wire Adapter** quando o componente precisa **ler dados e permanecer sincronizado** com o Commerce state.
+Exemplos oficiais:
+
+```javascript
+import {
+    CartItemsAdapter,
+    CartSummaryAdapter
+} from 'commerce/cartApi';
+
+import {
+    ProductAdapter,
+    ProductSearchAdapter,
+    ProductPricingAdapter
+} from 'commerce/productApi';
+```
+
+Salesforce define Wire Adapters essencialmente como operações de leitura baseadas em `GET`. Quando o underlying Commerce state muda, o adapter pode atualizar automaticamente o componente.
+
+![[mermaid-diagram 1.png]]
+
+Exemplo clássico de prova:
+
+> A custom cart badge must always display the current cart quantity.
+
+Melhor escolha:
+**`CartAdapter` / `CartSummaryAdapter` via Wire Adapter.**
+Não faça polling manual nem Apex se a Storefront API já fornece esse estado.
+
+#### 2. Imperative APIs — perform an operation

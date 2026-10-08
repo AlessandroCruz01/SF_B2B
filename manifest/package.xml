@@ -1,36 +1,40 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  NPCV-2132 — [Hypercare] Reservas de estoque no OCI com grande quantidade de itens
+
+  Escopo de DEPLOY: só o que a solução alterou + o campo do qual ela depende.
+  Solução: docs-jira/bugs/NPCV-2132--reservas-oci-orfas-carrinho-grande.md (seção 6)
+
+  Antes do deploy: retrieve deste manifest na org-alvo + git diff (a org pode ter mudado).
+
+  Validação (dry-run) com os testes da cadeia de reserva:
+    sf project deploy start -x manifest/npcv-2132.xml -o <alias> --dry-run -l RunSpecifiedTests
+      -t B2BOCIReservationHelperTest -t OmnichannelInventoryConnectorTest -t B2BCartReservationServiceTest
+      -t B2BInventoryExtensionValidatorTest -t B2BInventoryExtensionTest -t WebCartTriggerHandlerTest
+      -t CartItemTriggerHandlerTest -t B2BMandatoryProductServiceTest -t B2BCartExpirationServiceTest
+      -t OmnichannelInventoryServiceTest -t OmnichannelInventoryEngineTest -t FulfillReservationQueueableTest
+      -t B2BOrderReservationReleaseServiceTest -t B2BReleaseItemsReservationServiceTest
+-->
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
+
     <types>
-        <members>*</members>
+        <!-- Lotes de 100 + expirationSeconds + @future(callout=true) -->
+        <members>B2BOCIReservationHelper</members>
+        <members>B2BOCIReservationHelperTest</members>
+        <!-- Lotes de 100 em createReservations / releaseReservations -->
+        <members>OmnichannelInventoryConnector</members>
+        <members>OmnichannelInventoryConnectorTest</members>
+        <!-- Log de liberação recusada pelo OCI (caminho @future) -->
+        <members>B2BCartReservationService</members>
+        <members>B2BCartReservationServiceTest</members>
         <name>ApexClass</name>
     </types>
+
+    <!-- Dependência: prazo da reserva lido daqui (já existe nas orgs; sem alteração) -->
     <types>
-        <members>*</members>
-        <name>ApexComponent</name>
+        <members>RetailConfiguration__c.CartTimeoutMinutes__c</members>
+        <name>CustomField</name>
     </types>
-    <types>
-        <members>*</members>
-        <name>ApexPage</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>ApexTestSuite</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>ApexTrigger</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>AuraDefinitionBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>LightningComponentBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>StaticResource</name>
-    </types>
-    <version>67.0</version>
+
+    <version>64.0</version>
 </Package>

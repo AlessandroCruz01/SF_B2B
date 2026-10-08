@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>CartTimeoutMinutes__c</fullName>
+    <defaultValue>120</defaultValue>
+    <description>Absolute lifetime, in minutes, of a cart and its OCI stock reservation, counted from the first item added. When it is reached the cart is moved to PendingDelete and the reservation is released (NPCV-2153). Changing it only affects carts whose first item is added afterwards.</description>
+    <externalId>false</externalId>
+    <label>Cart Timeout Minutes</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>
