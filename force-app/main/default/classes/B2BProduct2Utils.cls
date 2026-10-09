@@ -31,4 +31,17 @@ public virtual class B2BProduct2Utils {
         return users.isEmpty() ? null : users[0].Contact?.AccountId;
     }
 
+    public virtual List<ProductCartCarouselWrapper.ProductWrapper> productsWrapperResponse(List<Product2> products) {
+        List<ProductCartCarouselWrapper.ProductWrapper> response = new List<ProductCartCarouselWrapper.ProductWrapper>();
+        for(Product2 product : products) {
+            ProductCartCarouselWrapper.ProductWrapper dto = new ProductCartCarouselWrapper.ProductWrapper();
+            dto.id = product.Id;
+            dto.name = product.Name;
+            dto.imageUrl = product.ImageURL__c;
+            dto.sku = product.ProductCode;
+            response.add(dto);
+        }
+        return response;
+    }
+
 }

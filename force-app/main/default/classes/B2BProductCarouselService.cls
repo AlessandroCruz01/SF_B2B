@@ -39,4 +39,9 @@ public virtual class B2BProductCarouselService {
         
         return JSON.serialize(this.response);
     }
+
+    public virtual List<ProductCartCarouselWrapper.ProductWrapper> getProductsToFooterCarousel(){
+        this.productRepository.getGenericProductsForFooterCarousel();
+        return this.productUtils.productsWrapperResponse(this.productRepository.getGenericProductsForFooterCarousel());
+    }
 }

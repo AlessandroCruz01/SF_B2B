@@ -1,0 +1,14 @@
+<template>
+    <div class="product-cards">
+        <div class="group">
+            <template for:each={products} for:item="product">
+                <c-product-cards-item key={product.Id} product={product}></c-product-cards-item>
+            </template>
+        </div>
+        <div aria-hidden class="group">
+            <template for:each={products} for:item="product">
+                <c-product-cards-item key={product.Id} product={product}></c-product-cards-item>
+            </template>
+        </div>
+    </div>
+</template>

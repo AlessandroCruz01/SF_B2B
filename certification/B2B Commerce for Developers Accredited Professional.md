@@ -11,20 +11,17 @@ exam: B2B Commerce for Developers Accredited Professional
 
 ## 🗺️ Mapa geral do Data Model
 
-![[00-b2b-commerce-data-model-overview.png]]
+![[data-model-overview.png]]
 
-## 📅 Roteiro de estudo
+## 📚 Temas da certificação
 
-| Day | Data  | Tema                                       | Conceitos-chave                                                                          |
-| --- | ----- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| 1   | 24/09 | Data Management — Store & Buyers           | `WebStore`, `BuyerAccount`, `BuyerGroup`                                                 |
-| 2   | 26/09 | Data Management — Products & Access        | `Product2`, `ProductCatalog`, `ProductCategory`, `CommerceEntitlementPolicy`             |
-| 3   | 28/09 | Data Management — Pricing                  | `Pricebook2`, `PricebookEntry`, `BuyerGroupPricebook`, `WebStorePricebook`, Pricing Strategy |
-| 4   | 29/09 | LWC — Estrutura & fundamentos              | Bundle HTML/JS/XML, `@api`, events, `lwc:if`, `for:each`, `key`, `iterator`              |
-| 5   | 30/09 | LWC — `@api`, getters & setters            | Public API, getters, setters, backing field                                              |
-| 6   | 01/10 | LWC — Component communication              | `CustomEvent`, `event.detail`, `bubbles` / `composed`, LMS                               |
-| 7   | 02/10 | LWC — Wire Adapters vs Imperative          | `@wire`, Commerce APIs, `cacheable=true`, `refreshApex()`                                |
-| 8   | 04/10 | LWC — Experience Builder & `.js-meta.xml`  | `isExposed`, `targets`, `targetConfigs`, `<property>`                                    |
+| Área                      | Tema                                                              | Conceitos-chave                                                                                  | Status      |
+| ------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------- |
+| Data Management           | Store & Buyers                                                    | `WebStore`, `BuyerAccount`, `BuyerGroup`                                                         | ✅          |
+| Data Management           | Products, Catalogs, Categories & Entitlements                     | `Product2`, `ProductCatalog`, `ProductCategory`, `CommerceEntitlementPolicy`                     | ✅          |
+| Data Management           | Pricing                                                           | `Pricebook2`, `PricebookEntry`, `BuyerGroupPricebook`, `WebStorePricebook`, Pricing Strategy     | ✅          |
+| Lightning Web Components  | Estrutura & fundamentos                                           | Bundle HTML/JS/XML, `@api`, events, `lwc:if`, `for:each`, `key`, `iterator`                      | ✅          |
+| Lightning Web Components  | `@api`, Public Properties, Getters/Setters & LWC Reactivity       | Public API, getters, setters, backing field, reactive fields, `@track`                           | 📍 Atual    |
 
 > [!info] Objetos associados padrão (vale para todos os SObjects abaixo)
 > - **`<Object>ChangeEvent`** → Change Data Capture: stream de eventos de criação, update, delete e undelete. Não é um objeto Salesforce (não suporta CRUD nem query).
@@ -35,16 +32,16 @@ exam: B2B Commerce for Developers Accredited Professional
 
 ---
 
-## 🗓️ Day 1 — Data Management: Store & Buyers
+## 🏪 Data Management — Store & Buyers
 
-> [!abstract] 24/09 · Data Management
+> [!abstract] Data Management
 > **Objetos:** `WebStore` · `BuyerAccount` · `BuyerGroup`
 
-![[day01-webstore-buyergroup-buyeraccount.png]]
+![[store-buyers-webstore-buyergroup-buyeraccount.png]]
 
 ### 1. [WebStore](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_webstore.htm)
 
-![[day01-webstore-erd.png]]
+![[store-buyers-webstore-erd.png]]
 
 A website where buyers and shoppers complete wholesale and retail transactions. Includes the fields and properties that define your store. For example, supported currencies, languages, and price books. Many fields are customizable.
 
@@ -102,7 +99,7 @@ A group of buyers with the same assigned entitlement policies, price books, and 
 | [BuyerGroupOwnerSharingRule](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_associated_objects_ownersharingrule.htm) | Sharing rules               |
 | [BuyerGroupShare](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_associated_objects_share.htm)                     | Sharing                     |
 
-> [!tip] Resumo do Day 1
+> [!tip] Resumo — Store & Buyers
 > **WebStore** → a loja (currencies, languages, price books)
 > **BuyerAccount** → a Account habilitada como buyer (crédito, limites)
 > **BuyerGroup** → o segmento que recebe entitlements, price books, promotions e shipping methods
@@ -111,12 +108,12 @@ A group of buyers with the same assigned entitlement policies, price books, and 
 
 ---
 
-## 🗓️ Day 2 — Data Management: Products, Catalogs, Categories & Entitlements
+## 📦 Data Management — Products, Catalogs, Categories & Entitlements
 
-> [!abstract] 26/09 · Data Management
+> [!abstract] Data Management
 > **Objetos:** `Product2` · `ProductCatalog` · `ProductCategory` · `CommerceEntitlementPolicy`
 
-![[day02-products-catalogs-categories-entitlements.png]]
+![[catalog-entitlements-overview.png]]
 
 ### 1. [Products — `Product2`](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_product2.htm)
 
@@ -249,7 +246,7 @@ Figures                         ← Level 1
 
 ### 4. [Entitlement Policy — `CommerceEntitlementPolicy`](https://help.salesforce.com/s/articleView?id=commerce.comm_entitlement_policies_intro.htm&type=5)
 
-A parte mais importante do conteúdo do dia. Imagine:
+A parte mais importante deste tema. Imagine:
 
 ```text
 Nexus Product Catalog
@@ -297,7 +294,7 @@ CanViewPrice   = false
 
 Isso permite diferenciar **product visibility** de **price visibility**.
 
-### ✅ Resumo do Day 2
+### ✅ Resumo — Products, Catalogs & Entitlements
 
 | Requirement                             | Pense primeiro em              |
 | --------------------------------------- | ------------------------------ |
@@ -308,15 +305,13 @@ Isso permite diferenciar **product visibility** de **price visibility**.
 | "Which products can these buyers see?"  | `CommerceEntitlementPolicy`    |
 | "Can the buyer see the price?"          | Entitlement / `CanViewPrice`   |
 
----
+### 💲 Data Management — Pricing
 
-## 🗓️ Day 3 — Data Management: Pricing
-
-> [!abstract] 28/09 · Data Management
+> [!abstract] Data Management
 > **Objetos:** `Pricebook2` · `PricebookEntry` · `BuyerGroupPricebook` · `WebStorePricebook`
 > **Conceitos:** Store Price Book × Buyer Group Price Book · Standard Price Book · Pricing Strategy (Best Price × Priority Price)
 
-![[day03-buyer-pricing-flow.png]]
+![[pricing-buyer-pricing-flow.png]]
 
 No B2B Commerce, um **Price Book** pode ser associado diretamente à **Store** ou a um **Buyer Group**. Quando associado à Store, compradores com acesso à Store podem receber esses preços; quando associado ao Buyer Group, os preços ficam disponíveis às Accounts pertencentes àquele grupo.
 
@@ -325,7 +320,7 @@ No B2B Commerce, um **Price Book** pode ser associado diretamente à **Store** o
 - Price Book associado à **Store** → qualquer customer que possa acessar aquela Store é elegível aos preços dele.
 - Price Book associado a um **Buyer Group** → somente Accounts associadas àquele Buyer Group são elegíveis. ([Salesforce](https://help.salesforce.com/s/articleView?id=commerce.comm_assign_pricebooks.htm&language=en_US&type=5))
 
-![[day03-pricebook-assignment-store-vs-buyergroup.png]]
+![[pricing-pricebook-assignment-store-vs-buyergroup.png]]
 
 > [!tip] Portanto
 > **Broad/default pricing → Store Price Book**
@@ -335,7 +330,7 @@ No B2B Commerce, um **Price Book** pode ser associado diretamente à **Store** o
 
 ### 2. The Store's Pricing Strategy — visão geral
 
-![[day03-multiple-pricebooks-pricing-strategy.png]]
+![[pricing-multiple-pricebooks-strategy.png]]
 
 Como um buyer pode pertencer a múltiplos Buyer Groups e um Buyer Group ou Store pode ter múltiplos Price Books, o mesmo buyer pode acabar com **multiple applicable Price Books**. A **Pricing Strategy** determina qual preço deve ser apresentado quando existem múltiplos preços disponíveis.
 
@@ -344,7 +339,7 @@ Como um buyer pode pertencer a múltiplos Buyer Groups e um Buyer Group ou Store
 > - **Price Book → PRICE**
 > - **Pricing Strategy → WHICH PRICE**
 
-![[day03-pricing-rules-mental-model.png]]
+![[pricing-rules-mental-model.png]]
 
 | Concept                    | Mental model                       |
 | -------------------------- | ---------------------------------- |
@@ -355,7 +350,7 @@ Como um buyer pode pertencer a múltiplos Buyer Groups e um Buyer Group ou Store
 
 #### Mental model consolidado
 
-![[day03-pricing-consolidated-flow.png]]
+![[pricing-consolidated-flow.png]]
 
 - 🤺 **Buyer Group Member → Who belongs to the segment**
 - 🤺 **Entitlement Policy → What the buyer can access**
@@ -371,9 +366,9 @@ Um Store Price Book oferece pricing de forma ampla aos customers que podem acess
 
 A documentação oficial de B2B Commerce lista explicitamente no Pricing Data Model os objetos **Buyer Group Price Book**, **Price Book 2**, **Web Store Price Book**, **Price Book Entry**, além de **Account**, **Buyer Group** e **Buyer Group Member**.
 
-![[day03-pricing-data-model-erd.png]]
+![[pricing-data-model-erd.png]]
 
-![[day03-pricing-data-model-objects.png]]
+![[pricing-data-model-objects.png]]
 
 #### `Pricebook2`
 
@@ -386,7 +381,7 @@ Mas o `Pricebook2` sozinho não diz *"Product X custa $80"*. Quem representa ess
 
 Um dos objetos mais importantes para memorizar. O Salesforce define `PricebookEntry` como a associação entre **Pricebook2 + Product2**. ([Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-dev-data-model.html))
 
-![[day03-pricebookentry-structure.png]]
+![[pricing-pricebookentry-structure.png]]
 
 > [!tip] Então
 > **Pricebook2 = collection of prices**
@@ -394,7 +389,7 @@ Um dos objetos mais importantes para memorizar. O Salesforce define `PricebookEn
 
 Isso também explica por que o mesmo Product pode ter preços diferentes:
 
-![[day03-same-product-multiple-pricebookentries.png]]
+![[pricing-same-product-multiple-pricebookentries.png]]
 
 É o **mesmo `Product2`**, com diferentes `PricebookEntry` records.
 
@@ -402,7 +397,7 @@ Isso também explica por que o mesmo Product pode ter preços diferentes:
 
 Distinção importante para developer questions: `BuyerGroupPricebook` é o **relationship object** que conecta **BuyerGroup ↔ Pricebook2**. **Não é um novo Price Book.**
 
-![[day03-buyergrouppricebook.png]]
+![[pricing-buyergrouppricebook.png]]
 
 Portanto, quando um cenário fala *"Assign a Price Book to a Buyer Group"*, no Data Model existe um relacionamento entre esses objetos, representado por **Buyer Group Price Book** — objeto que faz parte explicitamente do Pricing Data Model oficial.
 
@@ -410,7 +405,7 @@ Portanto, quando um cenário fala *"Assign a Price Book to a Buyer Group"*, no D
 
 Mesma lógica, mas agora para a Store: **WebStore ↔ Pricebook2**
 
-![[day03-webstorepricebook.png]]
+![[pricing-webstorepricebook.png]]
 
 A documentação confirma que um Price Book pode ser atribuído à **Store**, ao **Buyer Group**, ou a **ambos**. Quando atribuído à Store, customers que podem acessar aquela Store são elegíveis aos preços; quando atribuído ao Buyer Group, as Accounts pertencentes àquele grupo são elegíveis. ([Salesforce](https://help.salesforce.com/s/articleView?id=commerce.comm_assign_pricebooks.htm&language=en_US&type=5))
 
@@ -423,7 +418,7 @@ O **Standard Price Book** continua sendo um `Pricebook2`, mas possui um papel es
 >
 > A Salesforce permite apenas **one Standard Price Book**, e todos os Products utilizados nos custom Price Books devem primeiro existir nele. ([Salesforce](https://help.salesforce.com/s/articleView?id=commerce.comm_commerce_pricebooks.htm&language=en_US&type=5))
 
-![[day03-standard-pricebook-prerequisite.png]]
+![[pricing-standard-pricebook-prerequisite.png]]
 
 > [!warning] Armadilha comum
 > *"Gold customers need a negotiated price. Should we create another Product?"*
@@ -443,7 +438,7 @@ Um buyer pode receber múltiplos Price Books porque pode pertencer a vários Buy
 
 Com **Best Price**, a Store procura o menor preço disponível entre os Price Books aplicáveis ao buyer. ([Salesforce](https://help.salesforce.com/s/articleView?id=commerce.comm_priority_pricing.htm&language=en_US&type=5))
 
-![[day03-best-price-example.png]]
+![[pricing-best-price-example.png]]
 
 > [!tip] Best Price = lowest applicable price
 > Não importa qual Price Book você considere mais importante administrativamente. Se `$80` for o menor preço aplicável, `$80` vence.
@@ -462,7 +457,7 @@ O administrador define uma prioridade para os Price Books associados ao Buyer Gr
 
 Com **Priority Price**, o resultado é **$95** — mesmo existindo `$80` e `$70`.
 
-![[day03-priority-price-example.png]]
+![[pricing-priority-price-example.png]]
 
 A documentação oficial dá exatamente esse tipo de comportamento: um Price Book prioritário pode fornecer `$15`, enquanto outro oferece `$14`, e ainda assim `$15` é mostrado porque o primeiro Price Book possui maior prioridade.
 
@@ -490,11 +485,11 @@ Considere:
 
 #### 4.5 Onde isso entra no fluxo completo?
 
-![[day03-pricing-strategy-full-flow.png]]
+![[pricing-strategy-full-flow.png]]
 
 As Commerce Pricing APIs seguem a mesma lógica: o preço é determinado a partir dos Price Books atribuídos à Store e aos Buyer Groups do shopper, selecionando o menor preço ou o preço do Price Book de maior prioridade, de acordo com a estratégia configurada. ([Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-pricing-promotions-apis.html))
 
-### ⚠️ Exam Traps — Day 3
+### ⚠️ Exam Traps — Pricing
 
 | Conceito                   | Pergunta que ele responde                                        |
 | -------------------------- | ---------------------------------------------------------------- |
@@ -505,12 +500,12 @@ As Commerce Pricing APIs seguem a mesma lógica: o preço é determinado a parti
 
 ---
 
-## 🗓️ Day 4 — Basic LWC: Estrutura, HTML / JS / XML & fundamentos
+## ⚡ LWC — Estrutura, HTML / JS / XML & fundamentos
 
-> [!abstract] 29/09 · LWC Structure, HTML, JavaScript & Metadata
+> [!abstract] Lightning Web Components · Structure, HTML, JavaScript & Metadata
 > **Goal:** entender exatamente a responsabilidade de cada arquivo de um Lightning Web Component e reconhecer a configuração correta em cenários de prova.
 
-![[day04-lwc-bundle-files.png]]
+![[lwc-fundamentals-bundle-files.png]]
 
 ### 1. [LWC Component Bundle](https://developer.salesforce.com/docs/platform/lwc/guide/create-components-define.html)
 
@@ -648,7 +643,7 @@ export default class ProductCard extends LightningElement {
 > [!note] Observe a conversão: *camelCase → kebab-case*
 > JavaScript `productName` → HTML `product-name`
 
-![[day04-parent-to-child-api.png]]
+![[lwc-fundamentals-parent-to-child-api.png]]
 
 > [!tip] Regra de prova
 > `@api` → expose property or method publicly.
@@ -693,7 +688,7 @@ handleProductSelect() {
 }
 ```
 
-![[day04-child-to-parent-customevent.png]]
+![[lwc-fundamentals-child-to-parent-customevent.png]]
 
 > [!tip] Para prova
 > - **Parent → Child = properties / `@api`**
@@ -721,28 +716,10 @@ handleAddToCart() {
 
 A Salesforce recomenda declarative event listeners no template quando possível. ([Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/events-handling))
 
-#### 5.4 Reactivity
+> [!note] Reactivity
+> Como fields mudam o template e quando o componente rerenderiza está no tema seguinte: **`@api`, Public Properties, Getters/Setters & LWC Reactivity → 5. LWC Reactivity**.
 
-```js
-quantity = 1;
-
-handleIncrease() {
-    this.quantity++;
-}
-```
-
-```html
-<p>Quantity: {quantity}</p>
-```
-
-Quando `quantity` muda, o component pode rerenderizar automaticamente porque o field usado pelo template é reactive. ([Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reference-decorators))
-
-> [!warning] Pegadinha de material antigo
-> Você pode encontrar conteúdos dizendo `@track quantity;` para qualquer field reactive. **Isso está desatualizado.**
->
-> Hoje, fields do LWC já são reactive sem `@track` para mudanças normais de valor. `@track` ainda é relevante principalmente quando é necessário observar certas mudanças internas em **objects ou arrays**. Portanto, basta: `quantity = 1;`
-
-![[day04-api-vs-events.png]]
+![[lwc-fundamentals-api-vs-events.png]]
 
 > [!note] Nota mental
 > - **`@api`** → Public interface → Parent communicates **DOWN**
@@ -869,9 +846,9 @@ for:each  → normal list iteration
 iterator  → iteration + first / last information
 ```
 
-![[day04-conditional-rendering-lists.png]]
+![[lwc-fundamentals-conditional-rendering-lists.png]]
 
-### ✅ Resumo do Day 4 — Para a prova
+### ✅ Resumo — LWC Fundamentals para a prova
 
 | Need                                     | Use        |
 | ---------------------------------------- | ---------- |
@@ -882,10 +859,10 @@ iterator  → iteration + first / last information
 
 ---
 
-## 🗓️ Day 5 — Basic LWC: `@api`, public properties, getters & setters
+## ⚡ LWC — `@api`, Public Properties, Getters/Setters & LWC Reactivity
 
-> [!abstract] 30/09 · Public API, Getters & Setters
-> **Goal:** entender o que é public API de um componente e quando usar getters (valores derivados) e setters (transformar/validar valores recebidos).
+> [!abstract] 📍 Tema atual · Lightning Web Components
+> **Goal:** entender o que é public API de um componente, quando usar getters (valores derivados) e setters (transformar/validar valores recebidos), e quando uma mudança de estado faz o componente rerenderizar.
 
 ### 1. `@api` and Public Properties
 
@@ -1320,7 +1297,28 @@ Component State                incoming value
 | **Getter** | `get finalPrice() { return this.price - this.discount; }` | *"What value should I return?"* |
 | **Setter** | `set price(value) { this._price = Number(value); }` | *"What should I do when someone assigns a value?"* |
 
-### 5. Advanced Scenarios: Public API, Getters & Setters
+### 5. LWC Reactivity
+
+```js
+quantity = 1;
+
+handleIncrease() {
+    this.quantity++;
+}
+```
+
+```html
+<p>Quantity: {quantity}</p>
+```
+
+Quando `quantity` muda, o component pode rerenderizar automaticamente porque o field usado pelo template é reactive. ([Salesforce Developers](https://developer.salesforce.com/docs/platform/lwc/guide/reference-decorators))
+
+> [!warning] Pegadinha de material antigo
+> Você pode encontrar conteúdos dizendo `@track quantity;` para qualquer field reactive. **Isso está desatualizado.**
+>
+> Hoje, fields do LWC já são reactive sem `@track` para mudanças normais de valor. `@track` ainda é relevante principalmente quando é necessário observar certas mudanças internas em **objects ou arrays**. Portanto, basta: `quantity = 1;`
+
+### 6. Advanced Scenarios: Public API, Getters & Setters
 
 #### Scenario 1 — Dependent Public Properties
 
@@ -1367,673 +1365,15 @@ const localProduct = { ...this.product };
 > [!warning] Shallow copy
 > Essa operação copia apenas o primeiro nível do objeto. Objetos aninhados ainda compartilham referências.
 
-![[day05-getters-setters-data-flow.png]]
-
----
-
-## 🗓️ Day 6 — Basic LWC: Component communication & Custom Events
-
-> [!abstract] 01/10 · Objetivos de aprendizagem
-> Ao concluir o conteúdo do dia, você deverá conseguir:
-> - Distinguir Parent-to-Child, Child-to-Parent e Sibling Communication.
-> - Implementar `@api` public properties e public methods.
-> - Criar e tratar `CustomEvent`, utilizando `event.detail`.
-> - Entender `bubbles`, `composed` e `event.target`.
-> - Escolher a estratégia adequada de comunicação em um LWR Storefront.
-
-### 1. Component Communication
-
-O LWC utiliza um modelo de fluxo unidirecional: **properties down, events up**.
-
-| Direction            | Mechanism                 | Purpose                                          |
-| -------------------- | ------------------------- | ------------------------------------------------ |
-| Parent → Child       | `@api` property           | Passar dados                                     |
-| Parent → Child       | `@api` method             | Invocar comportamento                            |
-| Child → Parent       | `CustomEvent`             | Comunicar ações ou mudanças                      |
-| Sibling → Sibling    | Common Parent             | Compartilhar atualizações                        |
-| Unrelated Components | Lightning Message Service | Comunicação desacoplada em ambientes compatíveis |
-
-![[day06-component-communication-patterns.png]]
-
-> [!tip] Regra arquitetural
-> ***Componentes irmãos não precisam se conhecer diretamente. O componente responsável pelo estado coordena as atualizações.***
-
-### 2. Implementando Custom Events em um B2B Storefront
-
-> [!example] Business Requirement
-> Uma loja B2B possui dois componentes independentes dentro do mesmo Parent:
-> - `categoryFilter`: permite selecionar uma categoria.
-> - `productResults`: exibe os produtos associados à categoria selecionada.
->
-> Quando o comprador altera a categoria, os produtos exibidos devem ser atualizados.
-
-#### Step 1 — Child: `categoryFilter.js`
-
-```js
-import { LightningElement, api } from 'lwc';
-
-export default class CategoryFilter extends LightningElement {
-    @api selectedCategoryId = 'all';
-
-    categoryOptions = [
-        { label: 'All Products', value: 'all' },
-        { label: 'Hardware', value: 'hardware' },
-        { label: 'Software', value: 'software' }
-    ];
-
-    handleChange(event) {
-        const categoryId = event.detail.value;
-
-        this.dispatchEvent(
-            new CustomEvent('categorychange', {
-                detail: { categoryId }
-            })
-        );
-    }
-}
-```
-
-#### Step 2 — Child: `categoryFilter.html`
-
-```html
-<template>
-    <lightning-combobox
-        label="Product Category"
-        value={selectedCategoryId}
-        options={categoryOptions}
-        onchange={handleChange}>
-    </lightning-combobox>
-</template>
-```
-
-> [!note] Pontos importantes
-> - `new CustomEvent()` **cria** o evento; `this.dispatchEvent()` o **dispara**; `detail` **transporta os dados**.
-> - O nome `categorychange` **não recebe o prefixo `on`** na declaração. O prefixo aparece no listener HTML: `oncategorychange`.
-
-#### Step 3 — Parent: `storefrontContainer`
-
-`storefrontContainer.html`
-```html
-<template>
-    <c-category-filter
-        selected-category-id={selectedCategoryId}
-        oncategorychange={handleCategoryChange}>
-    </c-category-filter>
-
-    <c-product-results
-        selected-category-id={selectedCategoryId}>
-    </c-product-results>
-</template>
-```
-
-`storefrontContainer.js`
-```js
-import { LightningElement } from 'lwc';
-
-export default class StorefrontContainer
-    extends LightningElement {
-
-    selectedCategoryId = 'all';
-
-    handleCategoryChange(event) {
-        this.selectedCategoryId =
-            event.detail.categoryId;
-    }
-}
-```
-
-#### Step 4 — Receiving Child: `productResults`
-
-`productResults.js`
-```js
-import { LightningElement, api } from 'lwc';
-
-export default class ProductResults extends LightningElement {
-    @api selectedCategoryId = 'all';
-
-    products = [
-        { id: 'P1', name: 'Laptop', categoryId: 'hardware' },
-        { id: 'P2', name: 'CRM License', categoryId: 'software' },
-        { id: 'P3', name: 'Keyboard', categoryId: 'hardware' }
-    ];
-
-    get filteredProducts() {
-        if (this.selectedCategoryId === 'all') {
-            return this.products;
-        }
-
-        return this.products.filter(
-            product =>
-                product.categoryId === this.selectedCategoryId
-        );
-    }
-}
-```
-
-`productResults.html`
-```html
-<template>
-    <template for:each={filteredProducts}
-              for:item="product">
-        <p key={product.id}>
-            {product.name}
-        </p>
-    </template>
-</template>
-```
-
-O Parent mantém o estado e o segundo Child recebe a atualização por meio de uma public property. O getter recalcula a lista filtrada quando a propriedade reativa utilizada no template muda.
-
-> [!warning] Na loja real
-> Este exemplo **não substituiria** as verificações de acesso, Entitlement Policies ou os Commerce APIs responsáveis por fornecer os produtos permitidos para o comprador.
-
-### 3. Parent-to-Child — Public Methods
-
-Além de propriedades, o Parent pode chamar métodos do Child usando `@api`. Exemplo: limpar os filtros de um componente.
-
-Child — `categoryFilter.js` (trecho)
-```js
-@api
-resetFilters() {
-    this.dispatchEvent(
-        new CustomEvent('categorychange', {
-            detail: { categoryId: 'all' }
-        })
-    );
-}
-```
-
-Parent — `storefrontContainer.js` (trecho)
-```js
-handleReset() {
-    const child = this.template.querySelector(
-        'c-category-filter'
-    );
-
-    child?.resetFilters();
-}
-```
-
-O Parent invoca um método público no Child, que solicita a atualização do estado por meio de um evento. Assim, a propriedade controlada pelo Parent continua sendo a **fonte de verdade**. ([Salesforce](https://developer.salesforce.com/docs/platform/lwc/guide/create-javascript-methods.html))
-
-### 4. Event Propagation & Shadow DOM
-
-Por padrão, um `CustomEvent` possui estas configurações:
-
-```js
-new CustomEvent('productselected', {
-    detail: { productId: 'P1' },
-    bubbles: false,
-    composed: false
-});
-```
-
-| Property   | Default | Responsibility                                          |
-| ---------- | ------- | ------------------------------------------------------- |
-| `bubbles`  | `false` | Permitir que o evento suba pela árvore DOM              |
-| `composed` | `false` | Permitir que o evento atravesse uma Shadow DOM boundary |
-
-Quando usamos `this.dispatchEvent()` no Child, o evento é disparado no **host** do componente. O Parent pode recebê-lo com um listener diretamente nesse host, mesmo sem bubbling.
-
-Por outro lado, um evento disparado em um elemento interno do template pode exigir configuração adicional para alcançar listeners fora desse template. A Salesforce recomenda utilizar a **configuração de propagação mais restritiva possível**. ([Salesforce](https://developer.salesforce.com/docs/platform/lwc/guide/events-propagation.html))
-
-#### Event Retargeting
-
-Ao atravessar uma Shadow DOM boundary, `event.target` pode ser alterado para preservar o encapsulamento. Por isso:
-
-| Propriedade           | Significado                                                       |
-| --------------------- | ----------------------------------------------------------------- |
-| `event.target`        | Elemento identificado como origem do evento no contexto do listener |
-| `event.currentTarget` | Elemento em que o listener está registrado                        |
-| `event.detail`        | Payload explícito transportado pelo `CustomEvent`                 |
-
-> [!tip] Boa prática
-> Para dados de negócio, como `productId`, prefira o uso de `event.detail` com **valores primitivos ou cópias independentes de objetos**. ([Salesforce](https://developer.salesforce.com/docs/platform/lwc/guide/events-best-practices))
-
-### 5. Lightning Message Service — Quando utilizar?
-
-Quando componentes **não compartilham uma relação direta de Parent/Child**, considere Lightning Message Service (LMS).
-
-Em ambientes compatíveis, como Lightning Experience e componentes Lightning em LWR Experience Builder Sites, LMS permite comunicação através de **[Lightning Message Channels](https://developer.salesforce.com/docs/platform/lwc/guide/use-message-channel)**.
-
-O mecanismo é diferente de `CustomEvent`: em vez de percorrer a hierarquia de componentes, uma mensagem é **publicada em um canal** e recebida por seus **subscribers**.
-
-### 6. Knowledge Check — Exam Decision Rules
-
-| Business Requirement                   | Expected Solution                                    |
-| -------------------------------------- | ---------------------------------------------------- |
-| Parent sends a buyerId to Child        | `@api` property                                      |
-| Parent invokes a Child operation       | `@api` public method                                 |
-| Child reports a product selection      | `CustomEvent`                                        |
-| Child sends productId                  | `event.detail`                                       |
-| Two siblings share a selection         | Common Parent                                        |
-| Unrelated components exchange messages | Lightning Message Service, when supported            |
-| Event should remain locally scoped     | `bubbles: false`, `composed: false`, when sufficient |
-
-### 7. Practical Lab — B2B Product Carousel
-
-Construiremos três Lightning Web Components:
-
-![[day06-product-carousel-architecture.png]]
-
-| Component             | Responsibility                                            |
-| --------------------- | --------------------------------------------------------- |
-| `productCarousel`     | Gerenciar produtos, posição atual e seleção               |
-| `productCarouselCard` | Exibir informações de um produto e emitir `productselect` |
-| `carouselControls`    | Navegar entre produtos emitindo `previous` e `next`       |
-
-#### Step 1 — Estrutura dos componentes
-
-```text
-force-app/main/default/lwc/
-│
-├── productCarousel/
-│   ├── productCarousel.html
-│   ├── productCarousel.js
-│   ├── productCarousel.css
-│   └── productCarousel.js-meta.xml
-│
-├── productCarouselCard/
-│   ├── productCarouselCard.html
-│   ├── productCarouselCard.js
-│   ├── productCarouselCard.css
-│   └── productCarouselCard.js-meta.xml
-│
-└── carouselControls/
-    ├── carouselControls.html
-    ├── carouselControls.js
-    └── carouselControls.js-meta.xml
-```
-
----
-
-## 🗓️ Day 7 — Basic LWC: Wire Adapters vs Imperative Operations
-
-> [!abstract] 02/10 · Core Architecture Decisions
-> **Pergunta central:** When should an LWC retrieve data reactively using `@wire`, and when should it execute an imperative operation?
-
-### 1. `@wire` × Imperative
-
-| Feature             | `@wire`                          | Imperative                                                 |
-| ------------------- | -------------------------------- | ---------------------------------------------------------- |
-| Execution           | Framework-managed, reactive      | Explicitly invoked                                         |
-| Typical purpose     | Read data and respond to changes | User-triggered actions, reads or mutations                 |
-| Return model        | Stream of provisioned values     | Promise for asynchronous APIs                              |
-| Reactive parameters | `$propertyName`                  | Pass parameters when invoking                              |
-| Apex requirement    | `@AuraEnabled(cacheable=true)`   | `@AuraEnabled`; caching optional for read-only methods     |
-| DML through Apex    | Not allowed                      | Supported                                                  |
-| Commerce example    | `CartSummaryAdapter`             | `addItemToCart()`                                          |
-
-> [!note]
-> Apex calls and Commerce Storefront APIs have their own caching and refresh behavior. `@wire` does **not** guarantee that every backend change will trigger a new fetch.
-
-### 2. The Salesforce decision model
-
-![[day07-wire-vs-imperative-decision.png]]
-
-Prefer **standard Salesforce APIs over custom Apex** when they satisfy the requirement. In Commerce, Storefront APIs also handle buyer context and integrate with Storefront State Management.
-
-### 3. Practical examples — Nexus Figures
-
-#### Example A — Reactive reading of cart totals
-
-The adapter provides current cart summary data, and Commerce State Management coordinates updates to subscribed components.
-
-```js
-import { LightningElement, wire } from 'lwc';
-import { CartSummaryAdapter } from 'commerce/cartApi';
-
-export default class CartSummaryViewer extends LightningElement {
-    @wire(CartSummaryAdapter)
-    cartSummary;
-}
-```
-
-#### Example B — Buyer adds a product
-
-Here, `addItemToCart()` is an **imperative** Commerce API triggered by user interaction. Both APIs are officially supported in B2B Commerce.
-
-```js
-import { LightningElement, api } from 'lwc';
-import { addItemToCart } from 'commerce/cartApi';
-
-export default class ProductCartButton extends LightningElement {
-    @api productId;
-
-    async handleAddToCart() {
-        try {
-            await addItemToCart(this.productId, 1);
-        } catch (error) {
-            console.error('Add to cart failed', error);
-        }
-    }
-}
-```
-
-### ⚠️ Important exam traps — Day 7
-
-> [!warning] Exam traps
-> - `@wire` isn't exclusively for Apex; Salesforce provides **UI API** and **Commerce Wire Adapters**.
-> - `@wire` with Apex requires `cacheable=true`, which **prohibits data mutations**.
-> - An **imperative** Apex method can also be `cacheable=true` when it is read-only.
-> - Use `refreshApex()` for **Apex-wired** data, not for the result of an imperative Apex invocation.
-> - When imperative Apex changes records used by LDS, `notifyRecordUpdateAvailable()` can refresh affected LDS-managed record data.
-
----
-
-## 🗓️ Day 8 — Basic LWC: Experience Builder, targets, properties & `.js-meta.xml`
-
-> [!abstract] 04/10 · Experience Builder & LWC Configuration
-> **Topic:** Experience Builder, targets, properties & `.js-meta.xml`
-> **Current platform reference:** Winter '27 / API **68.0**
-
-### 1. What `.js-meta.xml` controls
-
-Every LWC bundle includes a configuration file such as:
-
-```text
-productCarousel/
-├── productCarousel.html
-├── productCarousel.js
-├── productCarousel.css
-└── productCarousel.js-meta.xml
-```
-
-The `.js-meta.xml` tells Salesforce **where the component can be used** and **how builders can configure it**. ([Developer](https://developer.salesforce.com/docs/platform/lwc/guide/reference-configuration-tags.html))
-
-For B2B Commerce, think of it this way:
-
-![[day08-js-meta-xml-flow.png]]
-
-### 2. `isExposed`
-
-```xml
-<isExposed>true</isExposed>
-```
-
-`true` allows the component to be exposed to supported builders. But **`isExposed=true` alone is not enough** — you also need an appropriate `<target>`. ([Developer](https://developer.salesforce.com/docs/platform/lwc/guide/use-config-for-community-builder))
-
-> [!warning] Exam trap
-> `isExposed=true` ≠ automatically available everywhere.
-> The **target** determines **where** the component can be used.
-
-### 3. The two targets you must distinguish
-
-For normal drag-and-drop Experience Builder components:
-
-```xml
-<targets>
-    <target>lightningCommunity__Page</target>
-</targets>
-```
-
-`lightningCommunity__Page` makes the component available in the **Components panel** so it can be placed on an Experience Builder page. ([Developer](https://developer.salesforce.com/docs/platform/lwc/guide/targets-lightning-community-page.html))
-
-But suppose the merchant must configure:
-- Heading
-- Number of products
-- Category
-- Display mode
-
-Then you also use:
-
-```xml
-<target>lightningCommunity__Default</target>
-```
-
-`lightningCommunity__Default` is the important target for exposing **editable component properties** in Experience Builder. ([Developer](https://developer.salesforce.com/docs/platform/lwc/guide/targets-lightning-community-default.html))
-
-> [!tip] Memorize
-> **`lightningCommunity__Page` → Where can I place the component?**
-> **`lightningCommunity__Default` → What can I configure on the component?**
-
-### 4. `targetConfigs` and `<property>`
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<LightningComponentBundle
-    xmlns="http://soap.sforce.com/2006/04/metadata">
-
-    <apiVersion>68.0</apiVersion>
-    <isExposed>true</isExposed>
-
-    <targets>
-        <target>lightningCommunity__Page</target>
-        <target>lightningCommunity__Default</target>
-    </targets>
-
-    <targetConfigs>
-        <targetConfig targets="lightningCommunity__Default">
-
-            <property
-                name="title"
-                type="String"
-                label="Title"
-                default="Featured Products"/>
-
-            <property
-                name="pageSize"
-                type="Integer"
-                label="Number of Products"
-                default="8"
-                min="1"
-                max="20"/>
-
-        </targetConfig>
-    </targetConfigs>
-
-</LightningComponentBundle>
-```
-
-The JavaScript must expose the corresponding properties:
-
-```js
-import { LightningElement, api } from 'lwc';
-
-export default class ProductCarousel extends LightningElement {
-    @api title;
-    @api pageSize;
-}
-```
-
-> [!tip] Regra de prova
-> The property `name` in XML **must match** the public property in JavaScript, and Experience Builder properties are exposed through **`@api`**. ([Developer](https://developer.salesforce.com/docs/platform/lwc/guide/targets-lightning-community-default.html))
-
-![[day08-experience-builder-targets-decision.png]]
-
----
-
-## 🗓️ Day 9 (05/10) — Basic LWC: Commerce-specific LWC Fundamentals
-Hoje começamos a parte em que LWC deixa de ser apenas “Lightning Web Components” e passa a operar dentro da arquitetura específica do **Salesforce B2B Commerce LWR storefront**.
-
-### 1. Custom LWC dentro do B2B Commerce
-Em uma loja B2B baseada em **LWR**, um custom LWC continua usando:
-
-- HTML → presentation
-- JavaScript → state, events e business logic
-- CSS → styling
-- `js-meta.xml` → exposure/configuration
-
-A diferença é que o componente normalmente precisa consumir dados e executar operações específicas de Commerce.
-
-Salesforce fornece as chamadas **Storefront APIs** justamente para isso. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
-Exemplos:
-
-```javascript
-import { CartSummaryAdapter } from 'commerce/cartApi';
-import { ProductSearchAdapter } from 'commerce/productApi';
-```
-
-Essas APIs são preferíveis a implementar manualmente toda a comunicação com REST/Apex quando a funcionalidade já existe na storefront API.
-
-### 2. Storefront APIs
-As **Storefront APIs** fornecem uma camada especializada para custom LWCs interagirem com o storefront.
-Existem três conceitos que você precisa reconhecer para a prova:
-
-**Wire Adapters**  
-→ leitura reativa de dados.
-
-**Imperative APIs**  
-→ operação explicitamente disparada pelo JavaScript.
-
-**Storefront Actions**  
-→ ações que participam do state management do storefront.
-
-Salesforce destaca vantagens como:
-- buyer entitlement enforcement
-- caching
-- performance/scalability
-- Commerce business logic
-- reactive storefront state
-- synchronization entre componentes [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
-
-![[mermaid-diagram.png]]
-
-Esse **State Management layer** é importante.
-Suponha:
-
-Product Card
-    ↓
-Add Product
-    ↓
-Cart State changes
-    ↓
-Cart Badge updates
-
-Você não deveria ter que construir manualmente uma cadeia de eventos entre todos os componentes do storefront para sincronizar esse estado. A camada Commerce coordena essas atualizações. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
-
-### 3. Commerce namespaces
-No exame, não memorize dezenas de adapters isoladamente. Primeiro reconheça o domínio pelo namespace.
-Exemplos importantes:
-
-```javascript
-commerce/productApi
-commerce/cartApi
-commerce/wishlistApi
-commerce/checkoutApi
-```
-
-Cada namespace agrupa capacidades relacionadas.
-Por exemplo, em `commerce/cartApi`, Salesforce disponibiliza adapters como:
-
-```javascript
-CartAdapter
-CartItemsAdapter
-CartSummaryAdapter
-CartCouponsAdapter
-CartPromotionsAdapter
-```
-
-Cada um resolve um tipo específico de storefront state.
-
-### 4. Por que não usar Apex para tudo?
-Considere:
-
-> A custom cart badge needs to display the current number of products in the buyer's cart.
-
-Você poderia pensar:
-
-LWC
- ↓
-Apex
- ↓
-SOQL / ConnectApi / REST
- ↓
-WebCart
-
-Mas se existe um Storefront API adequado, isso normalmente não é a melhor arquitetura.
-Prefira:
-
-LWC
- ↓
-commerce/cartApi
- ↓
-Commerce State Management
- ↓
-Current Cart
-
-Porque a Storefront API já foi projetada para:
-
-- storefront context
-- caching
-- Commerce security
-- buyer-specific behavior
-- reactivity
-
-Esse é exatamente o tipo de decisão arquitetural que pode aparecer na certificação. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
-
-### 5. Buyer context importa
-Em B2B Commerce, obter um produto não significa simplesmente consultar:
-```sql
-SELECT Id, Name FROM Product2
-```
-
-A storefront pode precisar considerar:
-Buyer
-  ↓
-Buyer Account
-  ↓
-Buyer Group
-  ↓
-Entitlement Policy
-  ↓
-Catalog
-  ↓
-Price Book
-  ↓
-Product availability + pricing
-
-Isso conecta diretamente o conteúdo de LWC com o que estudamos nos **Days 1–3**.
-
-Por isso Salesforce destaca que Storefront APIs podem aplicar automaticamente guardrails como **buyer entitlement** e agregar dados provenientes de catalogs, price books e outras fontes Commerce.
-
-![[mermaid-diagram (1) 2.png]]
-
-### 6. O conceito mais importante deste primeiro bloco
-Para a certificação, grave:
-
-> Custom Commerce LWC should use Commerce Storefront APIs when Salesforce already provides the required storefront capability.
-
-Não pense inicialmente:
-> “Como faço isso com Apex?”
-
-Pense:
-> “Does Commerce already provide an API, adapter, or action for this?”
-
-É a mesma mentalidade Salesforce de **use the platform capability before creating custom infrastructure**.
-
-Outro recurso oficial útil é a **Public Commerce LWR Library**, que contém reference LWCs semelhantes aos componentes disponíveis no Experience Builder e pode ser usada como base para custom storefront development. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-public-lwr-library.html?utm_source=chatgpt.com)
-
-### Wire Adapters vs Imperative APIs vs Storefront Actions
-Agora entramos na distinção mais importante das **Storefront APIs**. Em B2B Commerce LWR, Salesforce fornece três mecanismos principais para conectar custom LWCs ao storefront: **Wire Adapters, Imperative APIs e Storefront Actions**. [Developer](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html?utm_source=chatgpt.com)
-
-#### 1. Wire Adapters — reactive reads
-Use **Wire Adapter** quando o componente precisa **ler dados e permanecer sincronizado** com o Commerce state.
-Exemplos oficiais:
-
-```javascript
-import {
-    CartItemsAdapter,
-    CartSummaryAdapter
-} from 'commerce/cartApi';
-
-import {
-    ProductAdapter,
-    ProductSearchAdapter,
-    ProductPricingAdapter
-} from 'commerce/productApi';
-```
-
-Salesforce define Wire Adapters essencialmente como operações de leitura baseadas em `GET`. Quando o underlying Commerce state muda, o adapter pode atualizar automaticamente o componente.
-
-![[mermaid-diagram 1.png]]
-
-Exemplo clássico de prova:
-
-> A custom cart badge must always display the current cart quantity.
-
-Melhor escolha:
-**`CartAdapter` / `CartSummaryAdapter` via Wire Adapter.**
-Não faça polling manual nem Apex se a Storefront API já fornece esse estado.
-
-#### 2. Imperative APIs — perform an operation
+![[lwc-api-getters-setters-data-flow.png]]
+
+|Concept|Certification Rule|
+|---|---|
+|`@api`|Exposes Public Properties and Methods|
+|Boolean Attributes|Static attribute presence means `true`|
+|Primitive Reactivity|Does not require `@track`|
+|Objects & Arrays|New references support reactive updates|
+|`@track`|Tracks observed nested mutations in plain objects and arrays|
+|Custom Setter|Requires a corresponding getter|
+|Interdependent Properties|Prefer derived getters|
+|Parent-Child Communication|One-way Data Flow|

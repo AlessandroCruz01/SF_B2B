@@ -16,4 +16,13 @@ public with sharing class B2BProductCarouselController {
             throw new AuraHandledException(e.getMessage());
         }
     }
+
+    @AuraEnabled
+    public static List<ProductCartCarouselWrapper.ProductWrapper> getProductsToFooterCarousel(){
+        try {
+            return service.getProductsToFooterCarousel();
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
 }

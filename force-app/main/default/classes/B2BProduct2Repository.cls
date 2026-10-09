@@ -26,4 +26,15 @@ public virtual with sharing class B2BProduct2Repository {
 
          return searchResults;
     }
+
+    public virtual List<Product2> getGenericProductsForFooterCarousel(){
+        List<Product2> products = [
+            SELECT Id, Name, ProductCode, ImageURL__c
+            FROM Product2
+            WHERE IsActive = true
+                AND ImageURL__c != null
+            LIMIT 10
+        ];
+        return products;
+    }
 }
