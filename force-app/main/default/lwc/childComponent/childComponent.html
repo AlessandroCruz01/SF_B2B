@@ -1,0 +1,19 @@
+<template>
+    <div>
+        <p>
+            {message}
+        </p>
+    </div>
+
+    <div>
+        <button onclick={handleClick}>Click me</button>
+    </div>
+
+    <div>
+        <h1>
+            {messageToChild}
+        </h1>
+    </div>
+
+    <c-child2-component message={child2Message}></c-child2-component>
+</template>

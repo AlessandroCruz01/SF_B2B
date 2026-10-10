@@ -1377,3 +1377,156 @@ const localProduct = { ...this.product };
 |Custom Setter|Requires a corresponding getter|
 |Interdependent Properties|Prefer derived getters|
 |Parent-Child Communication|One-way Data Flow|
+
+## ⚡ LWC — Component Communication & Custom Events
+Em Lightning Web Components, a comunicação é baseada em One-Way Data Flow. O componente pai controla os dados que fornece aos filhos, enquanto os filhos utilizam eventos para comunicar ações e mudanças.
+A regra central é:
+> ***Props Down, Events Up.***
+
+![[mermaid-diagram (30).png]]
+
+| Communication            | Recommended mechanism                               |
+| ------------------------ | --------------------------------------------------- |
+| Parent → Child (data)    | `@api` Public Properties                            |
+| Parent → Child (actions) | `@api` Public Methods                               |
+| Child → Parent           | `CustomEvent`                                       |
+| Sibling → Sibling        | Common Parent + `CustomEvent` + reactive properties |
+| Unrelated components     | Lightning Message Service (LMS), where supported    |
+O parent pode invocar métodos públicos de um child utilizando `this.template.querySelector()` quando necessário. Para informar ações ao parent, o child deve disparar eventos, não tentar alterar diretamente o estado privado do parent.
+
+### CustomEvent — Child-to-Parent Communication
+Considere um storefront B2B Commerce com um componente `productTile` que permite adicionar um produto ao carrinho.
+
+==🟢**Child Component**==
+*Child Component — productTile.js*
+```
+import { LightningElement, api } from 'lwc';
+
+export default class ProductTile extends LightningElement {
+    @api productId;
+
+    handleAddToCart() {
+        const event = new CustomEvent('addtocart', {
+            detail: this.productId
+        });
+
+        this.dispatchEvent(event);
+    }
+}
+```
+
+*Child Component — productTile.html*
+```
+<template>
+    <lightning-button
+        label="Add to Cart"
+        onclick={handleAddToCart}>
+    </lightning-button>
+</template>
+```
+
+==🟠**Parent Component**==
+*Parent Component — productPage.html*
+```
+<template>
+    <c-product-tile
+        product-id={currentProductId}
+        onaddtocart={handleAddToCart}>
+    </c-product-tile>
+</template>
+```
+
+*Parent Component — productPage.js*
+```
+import { LightningElement } from 'lwc';
+
+export default class ProductPage extends LightningElement {
+    currentProductId = 'SKU-001';
+    selectedProductId;
+
+    handleAddToCart(event) {
+        this.selectedProductId = event.detail;
+    }
+}
+```
+
+---
+
+![[mermaid-diagram (31).png]]
+
+---
+
+
+> [!INFO] Pontos críticos para a certificação:
+>>`CustomEvent()` cria o evento.
+>
+>>`dispatchEvent()` dispara o evento.
+>
+>>`detail` transporta o payload.
+>
+>>`onaddtocart` registra o listener no template do parent.
+>
+>>`event.detail` permite ao parent recuperar o payload.
+
+O nome do evento deve seguir as recomendações da Salesforce: letras minúsculas, sem espaços, sem prefixo `on`; underscores são permitidos para separar palavras.
+
+### [Event Propagation: bubbles & composed](https://developer.salesforce.com/docs/platform/lwc/guide/events-propagation.html)
+Um dos conceitos mais importantes é determinar quais componentes conseguem receber um evento.
+
+O `CustomEvent` possui duas configurações:
+- `bubbles`: permite que o evento percorra os ancestrais do DOM.
+- `composed`: permite que o evento atravesse um Shadow DOM boundary durante sua propagação.
+
+Ambas são `false` por padrão.
+
+|bubbles|composed|Behavior|
+|---|---|---|
+|`false`|`false`|Sem propagação; ideal para comunicação direta|
+|`true`|`false`|Propaga pelos ancestrais dentro do mesmo Shadow DOM boundary|
+|`true`|`true`|Pode atravessar Shadow DOM boundaries e alcançar ancestrais externos|
+
+**Propagation visualizer**
+> bubbles: false, composed: false
+
+![[Pasted image 20261010153904.png]]
+
+> bubbles: true, composed: false
+
+![[Pasted image 20261010153941.png]]
+
+> bubbles: true, composed: true
+
+![[Pasted image 20261010154001.png]]
+
+Exam trap: Um `CustomEvent` disparado com `this.dispatchEvent()` no child pode ser recebido diretamente no elemento `<c-child>` pelo parent mesmo com `bubbles: false` e `composed: false`. Portanto, não é necessário configurar ambos como `true` para a comunicação direta Child → Parent.
+A Salesforce recomenda escolher a configuração menos permissiva possível, preservando encapsulamento e evitando expor eventos desnecessariamente.
+
+### Event Payload, Encapsulation & Retargeting
+#### Primitive vs. Object Payload
+Evite expor referências de objetos internos sem necessidade.
+
+| Preferred                | Risky                         |
+| ------------------------ | ----------------------------- |
+| Enviar um ID primitivo:  | Expor a referência do objeto: |
+| `detail: this.productId` | `detail: this.product`        |
+
+Caso o evento precise transportar um objeto, crie uma cópia contendo somente os dados necessários. Uma cópia superficial com spread syntax não isola automaticamente objetos aninhados.
+
+**event.target vs. event.currentTarget**
+
+|Property|Meaning|
+|---|---|
+|`event.target`|Target do evento, sujeito a retargeting ao atravessar Shadow DOM boundaries|
+|`event.currentTarget`|Elemento ao qual o listener em execução está associado|
+|`event.detail`|Payload definido no `CustomEvent`|
+
+Exam trap: Acessar elementos internos do child através de `event.target` pode falhar devido ao Shadow DOM encapsulation. A comunicação entre componentes deve utilizar um contrato explícito, como `detail` para transportar dados.
+
+#### Sibling Communication & [Lightning Message Service](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_lightningmessagechannel.htm)
+Para dois componentes irmãos, o parent costuma atuar como coordenador.
+
+![[mermaid-diagram (32).png]]
+
+Se os componentes não compartilham uma relação de composição adequada, Lightning Message Service pode ser utilizado para comunicação entre componentes desacoplados, onde o ambiente oferece suporte.
+
+LMS utiliza `LightningMessageChannel`, `publish()` e `subscribe()`. Há suporte em Lightning Experience e em componentes Lightning de Experience Builder Aura/LWR sites, com limitações documentadas. O módulo legado `pubsub` não é oficialmente mantido.

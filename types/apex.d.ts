@@ -8,3 +8,8 @@ declare module '@salesforce/apex/*' {
   const apexMethod: ApexMethod;
   export default apexMethod;
 }
+
+declare module '@salesforce/messageChannel/*' {
+  import type { WireAdapterConstructor } from 'lwc';
+  export const MessageContext: WireAdapterConstructor;
+}

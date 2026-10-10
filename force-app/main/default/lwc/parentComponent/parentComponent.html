@@ -1,0 +1,19 @@
+<template>
+    <div>
+        Parent Component
+        <!-- O child2 não aparece aqui: ele está dentro do childComponent.
+             Por isso o onchild2click fica na tag do child (retargeting). -->
+        <c-child-component message={parentMessage} child2-message={child2Message} onchildclick={childButtonClickHandler}
+            onchild2click={child2ButtonClickHandler}></c-child-component>
+    </div>
+    <div>
+        [PARENT]
+        Message From Child:
+        <strong>{messageChild}</strong>
+    </div>
+    <div>
+        [PARENT]
+        Message From Child 2:
+        <strong>{messageChild2}</strong>
+    </div>
+</template>
