@@ -1399,7 +1399,7 @@ Considere um storefront B2B Commerce com um componente `productTile` que permite
 
 ==🟢**Child Component**==
 *Child Component — productTile.js*
-```
+```javascript
 import { LightningElement, api } from 'lwc';
 
 export default class ProductTile extends LightningElement {
@@ -1416,7 +1416,7 @@ export default class ProductTile extends LightningElement {
 ```
 
 *Child Component — productTile.html*
-```
+```html
 <template>
     <lightning-button
         label="Add to Cart"
@@ -1427,7 +1427,7 @@ export default class ProductTile extends LightningElement {
 
 ==🟠**Parent Component**==
 *Parent Component — productPage.html*
-```
+```html
 <template>
     <c-product-tile
         product-id={currentProductId}
@@ -1437,7 +1437,7 @@ export default class ProductTile extends LightningElement {
 ```
 
 *Parent Component — productPage.js*
-```
+```javascript
 import { LightningElement } from 'lwc';
 
 export default class ProductPage extends LightningElement {
@@ -1530,3 +1530,157 @@ Para dois componentes irmãos, o parent costuma atuar como coordenador.
 Se os componentes não compartilham uma relação de composição adequada, Lightning Message Service pode ser utilizado para comunicação entre componentes desacoplados, onde o ambiente oferece suporte.
 
 LMS utiliza `LightningMessageChannel`, `publish()` e `subscribe()`. Há suporte em Lightning Experience e em componentes Lightning de Experience Builder Aura/LWR sites, com limitações documentadas. O módulo legado `pubsub` não é oficialmente mantido.
+
+## ⚡ LWC — Wire Adapters vs Imperative Operations
+**Objetivo**: dominar quando utilizar `@wire`, Imperative APIs e Storefront Actions em componentes LWC para B2B Commerce, considerando reatividade, cache, sincronização de estado e segurança.
+
+### Core Concept: Reactive vs Imperative
+Em B2B Commerce, a diferença não é simplesmente ler ou escrever dados. A decisão envolve quem controla a execução e quem mantém o estado atualizado.
+
+| Aspect              | Wire Adapter                           | Imperative Operation               |
+| ------------------- | -------------------------------------- | ---------------------------------- |
+| Execution           | Framework-controlled                   | Developer-controlled               |
+| Typical purpose     | Reactive data retrieval                | Explicit operations                |
+| Result              | Stream of values                       | Promise / single result            |
+| Reactive parameters | Supported                              | Explicitly passed                  |
+| Mutations           | Not appropriate                        | Supported                          |
+| Cache               | Adapter/service-managed                | Depends on API                     |
+| Typical trigger     | Initial configuration or state changes | Button click, event, explicit call |
+
+Um detalhe crítico: uma chamada imperative também pode ser utilizada para leitura. Já métodos Apex que realizam DML não podem ser utilizados com `@wire`.
+
+### B2B Commerce Storefront Architecture
+No B2B Commerce com LWR, existem três mecanismos importantes: Wire Adapters, Imperative APIs e Storefront Actions.
+
+![[mermaid-diagram (34).png]]
+
+Por exemplo, ao adicionar um produto ao carrinho, uma *Imperative API* pode executar a operação, enquanto o *Commerce State Management* coordena atualizações dos adapters associados ao carrinho. Esse mecanismo evita a necessidade de criar eventos customizados para sincronizar manualmente cada componente.
+
+### Practical Example — Shopping Cart
+
+| Reactive Read                                                                                                                          | Explicit Mutation                                                                                         |
+| -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `CartSummaryAdapter`                                                                                                                   | `addItemToCart()`                                                                                         |
+| Recupera informações sobre os totais do carrinho e permite que a interface reaja às atualizações disponibilizadas pelo Commerce state. | Adiciona um produto mediante uma operação explícita, normalmente iniciada por uma interação do comprador. |
+
+####  **Example A — Wire Adapter**
+```typescript
+import { LightningElement, wire } from 'lwc';
+import { CartSummaryAdapter } from 'commerce/cartApi';
+
+export default class CartTotals extends LightningElement {
+    @wire(CartSummaryAdapter)
+    cartSummary;
+}
+```
+
+> O resultado é disponibilizado por meio do wire, e alterações relevantes no estado do Commerce podem produzir novos valores.
+
+
+> [!NOTE] @Wire
+> O `@wire` é um decorator do LWC que **liga uma propriedade (ou função) do componente a uma fonte de dados reativa**, chamada de _wire adapter_. Você não chama nada manualmente: o framework faz a chamada, guarda em cache e atualiza o componente quando os dados mudam.
+> 
+>> `import { CartSummaryAdapter } from 'commerce/cartApi'; // ← o adapter (a fonte de dados)`
+>>> - **Adapter** (`CartSummaryAdapter`): um objeto que sabe buscar dados e avisar quando há dados novos. Quem o fornece é a plataforma (`commerce/cartApi`, `lightning/uiRecordApi`, Apex etc.).
+>>> - **Destino** (`cartSummary`): onde o LWC entrega o resultado.
+>
+>A propriedade sempre recebe um objeto com este formato:
+>> `{ data: <resultado> | undefined, error: <erro> | undefined }`
+>> Logo depois do componente ser criado, `data` e `error` estão os dois `undefined`. Eles só ganham valor quando o adapter responde.
+>
+>**Ciclo de vida**
+>> O componente é criado → o LWC instancia o adapter.
+>
+>> O componente entra no DOM (`connectedCallback`) → o adapter começa a buscar os dados.
+>
+>> Os dados chegam → o LWC atribui `{ data, error }` à propriedade → o template **re-renderiza automaticamente**.
+>
+>> Os dados mudam na fonte (por exemplo, um item é adicionado ao carrinho) → o adapter **avisa de novo** e a propriedade é atualizada. Isso é o que torna o wire _reativo_.
+>
+> O componente sai do DOM → o adapter é desconectado.
+>No `CartSummaryAdapter` esse passo 4 é o ponto principal: quando qualquer parte da loja altera o carrinho, todo componente que usa o wire recebe o resumo atualizado sem você fazer nada.
+##### Parâmetros reativos (`$`)
+Muitos adapters recebem configuração. Se você prefixar um valor com `$`, ele vira **reativo**: quando a propriedade muda, o wire roda de novo.
+```javascript
+import { ProductAdapter } from 'commerce/productApi';
+
+@api productId: string;
+
+@wire(ProductAdapter, { productId: '$productId' })
+product: any;
+```
+
+- Com `'$productId'`, se o `productId` mudar, o wire busca o novo produto.
+- Com `'productId'` (sem `$`), o adapter recebe a **string literal** "productId", o que é um bug comum.
+- O wire só roda quando todos os parâmetros reativos estão definidos (diferentes de `undefined`).
+
+O `CartSummaryAdapter` não precisa de configuração, por isso o seu código passa só o adapter.
+
+##### @Wire em função (quando precisa tratar os dados)
+Em vez de uma propriedade, você pode ligar o wire a um método e transformar o resultado:
+```typescript
+cartTotal?: string;
+
+@wire(CartSummaryAdapter)
+handleCart({ data, error }: { data?: any; error?: any }) {
+  if (data) {
+    this.cartTotal = data.grandTotalAmount;
+  } else if (error) {
+    console.error(error);
+  }
+}
+```
+
+Use a forma de ***propriedade*** quando só vai exibir os dados. Use a forma de função ***quando*** precisa calcular, mapear ou guardar partes do resultado.
+
+#####  `@wire` vs chamada imperativa
+
+|             | `@wire`                                                   | Imperativo (`await getX()`)                                              |
+| ----------- | --------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Quando roda | Automaticamente, ao conectar e quando os parâmetros mudam | Quando você chama                                                        |
+| Atualização | Reativa (recebe mudanças)                                 | Só uma vez                                                               |
+| Uso típico  | **Ler** dados para exibir                                 | **Ações** (adicionar ao carrinho, salvar), ou buscar depois de um clique |
+| Cache       | Sim (LDS / Commerce store)                                | Depende                                                                  |
+
+Na loja, o padrão comum é: o **wire lê** o carrinho e **funções imperativas alteram** o carrinho (`addItemToCart`, por exemplo). A alteração dispara a atualização, e o wire entrega o carrinho novo para todos os componentes.
+
+##### 🚩 Ponto de atenção no seu código (TypeScript)
+`cartSummary: any` funciona, mas você perde a checagem de tipos. Se quiser tipar:
+```typescript
+@wire(CartSummaryAdapter)
+cartSummary?: { data?: CartSummaryData; error?: unknown };
+```
+
+(`CartSummaryData` seria a sua interface com os campos que você usa, como `totalProductCount` e `grandTotalAmount`.)
+
+
+#### **Example B — Imperative API**
+Uma API imperativa é **uma função que você chama quando quer**. Ela retorna uma `Promise`. É o oposto do `@wire`: o framework não faz nada sozinho, o seu código decide o momento.
+
+```typescript
+import { LightningElement, api } from 'lwc';
+import { addItemToCart } from 'commerce/cartApi';
+
+export default class AddProduct extends LightningElement {
+    @api productId;
+
+    async handleAddToCart() {
+        try {
+            await addItemToCart(this.productId, 1);
+        } catch (error) {
+            // Handle the operation error
+        }
+    }
+}
+```
+
+> O componente controla quando adicionar o produto. A função retorna uma Promise. Os mecanismos nativos de Commerce State Management podem refletir a alteração em outros componentes que utilizam os adapters correspondentes.
+
+#####  Quando usar
+
+| `@wire`                   | Imperativo                                        |
+| ------------------------- | ------------------------------------------------- |
+| **Ler** dados para exibir | **Alterar** dados (adicionar, atualizar, remover) |
+| Roda sozinho ao conectar  | Roda quando você chama (clique, submit, etc.)     |
+| Recebe atualizações       | Resposta única                                    |
+
