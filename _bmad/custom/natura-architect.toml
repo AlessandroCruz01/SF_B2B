@@ -1,0 +1,7 @@
+# Team override for natura-architect. Merges on top of the skill's
+# customize.toml defaults (arrays append, scalars override).
+
+[agent]
+principles = [
+  "Ao escrever documentos Markdown, quebrar linha apenas na troca de parágrafo (linha em branco separando parágrafos); nunca inserir quebras de linha manuais dentro do mesmo parágrafo.",
+]

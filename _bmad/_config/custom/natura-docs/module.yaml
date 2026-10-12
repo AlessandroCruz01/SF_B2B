@@ -1,0 +1,56 @@
+# Natura Docs Module Configuration
+# This file defines installation questions and module configuration values
+
+code: 'natura-docs'
+name: 'Natura Docs'
+header: 'Natura Docs - Documentação Brownfield B2B Commerce'
+subheader: 'Agentes especializados para consulta da documentação do projeto Natura'
+default_selected: false
+
+# Welcome message shown during installation
+prompt:
+    - 'Bem-vindo ao Natura Docs!'
+    - 'Este modulo fornece agentes especializados para consulta da documentacao brownfield do projeto B2B Commerce Natura.'
+
+# Core config values are automatically inherited from installer:
+## user_name
+## communication_language
+## document_output_language
+## output_folder
+
+# ============================================================================
+# CONFIGURATION FIELDS
+# ============================================================================
+
+# Path to brownfield documentation (site gerado)
+docs_path:
+    prompt: 'Onde esta a documentacao brownfield gerada (site) do projeto?'
+    default: 'docs/project'
+    result: '{project-root}/{value}'
+
+# Path to project docs por ticket/feature (manual, guides, architecture, superpowers)
+project_docs_path:
+    prompt: 'Onde esta a documentacao do projeto (manual, guides, architecture)?'
+    default: 'docs'
+    result: '{project-root}/{value}'
+
+# ============================================================================
+# AGENT ROSTER
+# ============================================================================
+# Install-time roster consumed by BMad to register the module's agents.
+agents:
+    - code: natura-analyst
+      name: Analyst
+      title: Assistente de Análise Funcional Natura B2B
+      icon: 📋
+      description: Regras de negócio, fluxos do sistema e modelos de dados do B2B Commerce Natura.
+    - code: natura-architect
+      name: Architect
+      title: Assistente de Arquitetura Natura B2B
+      icon: 🏗️
+      description: Arquitetura, integrações, padrões de projeto e decisões técnicas do B2B Commerce Natura.
+    - code: natura-dev
+      name: Dev
+      title: Assistente de Desenvolvimento Natura B2B
+      icon: 🔧
+      description: Classes Apex, componentes LWC, padrões de projeto e guias de desenvolvimento do B2B Commerce Natura.

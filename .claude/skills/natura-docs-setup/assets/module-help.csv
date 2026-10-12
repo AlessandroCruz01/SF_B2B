@@ -1,0 +1,6 @@
+module,skill,display-name,menu-code,description,action,args,phase,preceded-by,followed-by,required,output-location,outputs
+Natura Docs,_meta,,,,,,,,,false,{project-root}/_bmad/natura-docs/README.md,
+Natura Docs,natura-analyst,Analyst,AN,Assistente funcional: regras de negócio, fluxos e modelos de dados do B2B Commerce Natura. Consulta factual com citação de fonte (arquivo:seção).,,,anytime,,,false,,
+Natura Docs,natura-architect,Architect,AR,Assistente de arquitetura: decisões técnicas, integrações, camadas e padrões de projeto do B2B Commerce Natura. Consulta factual com citação de fonte.,,,anytime,,,false,,
+Natura Docs,natura-architect,Code Review,CR,Inicia o workflow de code review de PR (validação técnica, funcional e planilhas de controle) a partir do agente Architect.,CR,,anytime,,,false,,review report
+Natura Docs,natura-dev,Dev,DV,Assistente técnico: classes Apex, componentes LWC, padrões de projeto e guias de desenvolvimento do B2B Commerce Natura. Consulta factual com citação de fonte.,,,anytime,,,false,,

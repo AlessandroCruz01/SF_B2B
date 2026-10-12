@@ -1655,8 +1655,6 @@ cartSummary?: { data?: CartSummaryData; error?: unknown };
 
 
 #### **Example B — Imperative API**
-Imperative API não é uma API específica, é um padrão. Ele aparece no Apex imperativo, no `lightning/uiRecordApi` (`createRecord`, `updateRecord`, `deleteRecord`) e nos módulos **`commerce/*`**. Na documentação de Commerce, cada módulo vem dividido em duas seções: _Wire Adapters_ e _Imperative APIs_.
-
 Uma API imperativa é **uma função que você chama quando quer**. Ela retorna uma `Promise`. É o oposto do `@wire`: o framework não faz nada sozinho, o seu código decide o momento.
 
 ```typescript
@@ -1679,78 +1677,12 @@ export default class AddProduct extends LightningElement {
 > O componente controla quando adicionar o produto. A função retorna uma Promise. Os mecanismos nativos de Commerce State Management podem refletir a alteração em outros componentes que utilizam os adapters correspondentes.
 
 #####  Quando usar
-- **Quem decide quando chamar é você**: num clique, numa condição ou numa sequência de passos.
-- **Retorna uma Promise.** Você usa `async/await` e `try/catch`, e gerencia o spinner e os erros.
-- **É o único caminho para escrever dados**: add to cart, apply coupon, place order, DML.
-- **Não é reativa.** Uma leitura imperativa devolve uma "foto" do momento e não se atualiza depois.
 
-|Módulo|Wire (ler)|Imperativo (agir)|
-|---|---|---|
-|`commerce/cartApi`|`CartSummaryAdapter`, `CartItemsAdapter`|`addItemToCart`, `updateItemInCart`, `deleteItemFromCart`, `applyCouponToCart`, `refreshCartSummary`|
-|`commerce/productApi`|`ProductAdapter`, `ProductPricingAdapter`|—|
-|`commerce/checkoutApi`|`CheckoutInformationAdapter`|`updateShippingAddress`, `placeOrder`, …|
-|`commerce/contextApi`|`AppContextAdapter`, `SessionContextAdapter`|—|
-|`lightning/uiRecordApi`|`getRecord`, `getRecords`|`createRecord`, `updateRecord`, `deleteRecord`|
-|Apex|`@wire(metodo)` só com `cacheable=true`|`metodo({...})`, sempre disponível|
+| `@wire`                   | Imperativo                                        |
+| ------------------------- | ------------------------------------------------- |
+| **Ler** dados para exibir | **Alterar** dados (adicionar, atualizar, remover) |
+| Roda sozinho ao conectar  | Roda quando você chama (clique, submit, etc.)     |
+| Recebe atualizações       | Resposta única                                    |
 
-Os nomes exatos podem mudar entre releases, então confira na referência de cada módulo.
+![[mermaid-diagram (35).png]]
 
-**Erros comuns**
-1. `@wire` com Apex exige `cacheable=true`, e um método cacheable **não pode fazer DML**.
-2. `refreshApex` só funciona com o objeto **inteiro** que o `@wire` entregou. No wire em função, guarde o resultado completo, não só o `data`.
-3. Na primeira entrega, o wire pode vir com `data` e `error` ambos `undefined`. Sempre faça a checagem.
-4. O parâmetro reativo é uma **string** com `$`: `{ recordId: '$recordId' }`. Sem o `$`, o valor não é reativo.
-5. Chamar uma função imperativa dentro de `renderedCallback` sem uma flag de controle pode causar loop infinito.
-6. Os dados do wire são read-only. Para editar, clone antes (`{ ...data }` ou `structuredClone`).
-
-### Apex Wire vs Imperative Apex
-Aqui está uma distinção que costuma gerar erros em cenários de certificação.
-
-**Apex via `@wire`:** exige `@AuraEnabled(cacheable=true)` e deve ser usado para operações somente de leitura.
-
-**Imperative Apex:** permite chamadas controladas pelo desenvolvedor, inclusive métodos sem `cacheable=true` que realizam DML.
-
-```java
-public with sharing class ApexWire_vs_ImperativeApex {
-
-    //* Mutation: imperative invocation required
-    @AuraEnabled
-    public static void updateAccountName(
-
-        Id accountId,
-        String newName
-    ) {
-        update new Account(
-            Id = accountId,
-            Name = newName
-        );
-    }
-
-    //* Read-only operation
-    @AuraEnabled(cacheable=true)
-    public static List<Account> getAccounts() {
-        return [
-            SELECT Id, Name
-            FROM Account
-            LIMIT 10
-        ];
-    }
-}
-```
-
-Cache invalidation também depende da origem dos dados:
-
-|Situation|Correct approach|
-|---|---|
-|Refresh data returned from wired Apex|`refreshApex(wiredResult)`|
-|Records changed through imperative Apex and consumed by LDS|`notifyRecordUpdateAvailable([{recordId}])`|
-|Refresh an imperative Apex result|Invoke the method again|
-|Commerce cart mutation|Prefer Commerce APIs and their state management|
-`notifyRecordUpdateAvailable()` não substitui `refreshApex()` para uma consulta Apex provisionada via `@wire`. E `refreshApex()` deve receber o objeto fornecido pelo wire, não apenas `data`
-
-### Exam Traps
-- Reactive configuration: `$recordId` ou outro parâmetro dinâmico faz o wire responder a alterações de valores.
-- Undefined configuration: parâmetros obrigatórios `undefined` impedem a provisão de dados pelo wire.
-- Immutable data: nunca altere diretamente o objeto recebido de um wire; faça uma cópia quando precisar transformá-lo.
-- Lifecycle: não assuma que `@wire` será resolvido exatamente em `connectedCallback()` ou `renderedCallback()`.
-- No automatic refresh everywhere: o comportamento de atualização do Commerce State Management não significa que qualquer Apex wire será atualizado automaticamente.
