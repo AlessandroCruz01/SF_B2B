@@ -1686,3 +1686,131 @@ export default class AddProduct extends LightningElement {
 
 ![[mermaid-diagram (35).png]]
 
+## ⚡ LWC — Commerce-specific LWC Fundamentals
+**Objetivo**: compreender o que diferencia um Lightning Web Component tradicional de um componente desenvolvido especificamente para um B2B Commerce storefront.
+
+### LWC vs Commerce-specific LWC
+Um LWC tradicional é um componente de interface criado com HTML, JavaScript, CSS e metadata. Um Commerce-specific LWC utiliza essa mesma tecnologia, mas opera dentro do ecossistema comercial da loja.
+
+|Traditional LWC|Commerce-specific LWC|
+|---|---|
+|Salesforce Platform context|LWR Commerce storefront context|
+|General-purpose data APIs|Commerce Data Providers e Storefront APIs|
+|Record-centric behavior|Buyer, Product, Cart e Checkout behavior|
+|Conventional component state|Shared storefront state|
+|General record access|Buyer entitlements e Commerce business rules|
+
+O ponto central é que um Commerce component precisa respeitar as regras comerciais da loja, não apenas carregar e apresentar registros.
+
+Por exemplo, um componente que mostra preços precisa considerar o buyer context, incluindo o effective account e as regras de precificação aplicáveis. Recuperar diretamente um valor de `Product2` não equivale a obter o preço comercial válido para aquele comprador.
+
+Os Storefront APIs aplicam guardrails comerciais e oferecem mecanismos otimizados de integração entre componentes.
+
+### A estratégia correta para customizar componentes
+A Salesforce recomenda priorizar componentes existentes e fontes de dados nativas, evitando desenvolvimento desnecessário.
+
+![[mermaid-diagram (36).png]]
+
+A ordem recomendada é:
+1. [OOTB Components](https://help.salesforce.com/s/articleView?id=commerce.comm_components.htm&type=5): aproveitar componentes padrão existentes.
+	* **OOTB** quer dizer **Out-Of-The-Box**, "pronto para uso". São os **componentes padrão que a Salesforce já entrega com a loja LWR** de B2B/D2C. Eles aparecem no Experience Builder, e você só arrasta para a página e configura. Não precisa escrever código para [componentes personalizados](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-custom-component.html).
+2. Data Providers + LWR Expressions: consumir dados fornecidos pelo contexto da página.
+3. Commerce Storefront APIs: utilizar interfaces especializadas de dados e operações comerciais.
+4. Custom Apex / Backend for Frontend (BFF): utilizar quando as opções anteriores não atendem à necessidade.
+
+
+Evite chamadas diretas aos Connect APIs com `fetch()` quando uma Storefront API atende ao caso. Isso pode contornar otimizações de caching e coordenação de dados fornecidas pela plataforma.
+
+### Commerce Data Binding e Rendering
+Considere uma Product Detail Page (PDP) com um componente customizado que exibe uma informação adicional sobre o produto.
+
+O Experience Builder pode fornecer dados por meio de [LWR Expressions](https://developer.salesforce.com/docs/platform/exp-cloud-lwr/guide/advanced-expressions.html), vinculando-os às propriedades `@api` do componente.
+
+> ***Atenção***: os dados podem não estar disponíveis imediatamente. A plataforma pode preencher o contexto progressivamente, provocando novas renderizações.
+
+Exemplo conceitual de um componente preparado para receber uma string configurada ou vinculada pelo Builder:
+
+```typescript
+import { LightningElement, api } from 'lwc';
+
+export default class ProductMessage extends LightningElement {
+    @api productMessage;
+
+    get hasMessage() {
+        return typeof this.productMessage === 'string'
+            && this.productMessage.trim().length > 0;
+    }
+}
+```
+
+```html
+<template>
+    <template lwc:if={hasMessage}>
+        <p>{productMessage}</p>
+    </template>
+</template>
+```
+
+O componente não pressupõe que o valor foi entregue antes da primeira renderização. Quando a propriedade pública recebe um valor posteriormente, o LWC pode atualizar a interface reativamente.
+
+ >**Exam Trap**: não confunda ausência inicial de dados com falha definitiva de carregamento. O componente deve tolerar dados ainda não definidos ou incompletos.
+
+### Experience Builder e Commerce Metadata
+Para que esse componente seja adicionado visualmente à storefront, sua configuração `.js-meta.xml` precisa expor os targets apropriados.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="productMessage"
+                type="String"
+                label="Product Message"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
+```
+
+Esse exemplo ilustra os targets e a propriedade editável. Em um projeto real, a versão e as capabilities adicionais devem ser compatíveis com o runtime da storefront.
+
+| Metadata                      | Purpose                                 |
+| ----------------------------- | --------------------------------------- |
+| `isExposed=true`              | Permite exposição no Builder            |
+| `lightningCommunity__Page`    | Disponibiliza como componente de página |
+| `lightningCommunity__Default` | Habilita configuração de propriedades   |
+| `targetConfigs`               | Define as propriedades configuráveis    |
+| `@api`                        | Expõe a propriedade no JavaScript       |
+
+A documentação específica de Commerce LWR também descreve a capability `lightningCommunity__RelaxedCSP` para componentes utilizados nesse runtime. Ela é distinta dos targets de posicionamento e edição de propriedades.
+
+### Storefront APIs: três tipos de interação
+| Mechanism          | Responsibility                                           | Example          |
+| ------------------ | -------------------------------------------------------- | ---------------- |
+| Wire Adapters      | Observação e provisionamento reativo de dados            | Cart summary     |
+| Imperative APIs    | Execução de operações                                    | Add item to cart |
+| Storefront Actions | Integração contextual entre componentes e Data Providers | Cart item action |
+
+Considere um Product Detail component e um Cart Badge no mesmo storefront.
+
+Quando o usuário adiciona um produto ao carrinho por uma interface Commerce suportada, a camada de state management coordena a atualização dos dados relevantes. Componentes inscritos nos adapters correspondentes podem receber as atualizações sem desenvolver uma solução paralela de sincronização.
+
+Essa integração de estado é uma diferença importante em relação a tratar componentes como interfaces isoladas.
+
+### Exam Decision Rules
+|Requirement|Best-practice starting point|
+|---|---|
+|Standard PDP customization|Existing OOTB component|
+|Data already supplied to a page|Data Provider + LWR Expression|
+|Reactive cart summary|Commerce Wire Adapter|
+|Buyer-initiated commerce operation|Commerce Imperative API ou Storefront Action apropriada|
+|Unsupported specialized business process|Custom backend integration|
+|Component missing from Builder|Check `isExposed`, targets and runtime requirements|
+
+Regra fundamental do Day 15: Commerce-native first. Escolha uma solução que preserve buyer context, platform security, caching e storefront consistency antes de criar mecanismos customizados.

@@ -241,6 +241,7 @@
   },
   "active": "321436c1b86c1d2f",
   "lastOpenFiles": [
+    "certification/sources/mermaid-diagram (36).png",
     "_bmad/scripts/resolve_customization.py",
     "_bmad/scripts/memlog.py",
     "_bmad/scripts/resolve_config.py",
@@ -251,7 +252,6 @@
     "_bmad/custom/natura-dev.toml",
     "_bmad/custom/natura-architect.toml",
     "_bmad/custom/natura-analyst.toml",
-    "_bmad/custom/config.toml",
     "_bmad/core/resources/excalidraw/validate-json-instructions.md",
     "_bmad/core/resources/excalidraw/README.md",
     "_bmad/core/resources/excalidraw/library-loader.md",
