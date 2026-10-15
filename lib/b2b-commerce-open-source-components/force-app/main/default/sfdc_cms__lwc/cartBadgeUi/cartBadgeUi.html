@@ -1,0 +1,118 @@
+<template lwc:render-mode="light">
+    <span
+        class="cart-container slds-dropdown-trigger"
+        data-automation="cart-badge"
+        style={customStyles}>
+        <template lwc:if={showMiniCart}>
+            <button
+                onclick={handleCartButtonIconClick}
+                class="slds-button slds-button_icon slds-button_icon-border-filled"
+                aria-expanded={displayMiniCart}>
+                <span
+                    class="slds-icon_container icon-container"
+                    title={iconAssistiveText}>
+                    <svg
+                        tabindex="-1"
+                        class="slds-icon slds-icon-text-default slds-icon_small slds-global-actions__notifications slds-global-actions__item-action"
+                        aria-hidden="true">
+                        <use href={iconUrl}></use>
+                    </svg>
+                    <span class="slds-assistive-text">{iconAssistiveText}</span>
+                </span>
+            </button>
+        </template>
+        <template lwc:elseif={showCartsList}>
+            <span
+                class={_cartListWrapperClass}
+                style={_cartsListIconStyle}>
+                <lightning-button-menu
+                    icon-name="utility:cart"
+                    variant="bare"
+                    alternative-text={iconAssistiveText}
+                    title={iconAssistiveText}
+                    menu-alignment="right"
+                    class="cart-list-menu"
+                    onopen={handleCartsListOpen}
+                    onclose={handleCartsListClose}>
+                    <!-- Loading State -->
+                    <template lwc:if={_isCartsLoading}>
+                        <div
+                            class="cart-list-menu-item cart-list-menu-item_loading"
+                            role="status"
+                            aria-live="polite">
+                            <lightning-spinner
+                                alternative-text={_loadingCartsLabel}
+                                size="x-small"></lightning-spinner>
+                            <span>{_loadingCartsLabel}</span>
+                        </div>
+                    </template>
+
+                    <!-- Error State -->
+                    <template lwc:elseif={_isCartsError}>
+                        <div
+                            class="cart-list-state-container cart-list-error cart-list-error_vertical"
+                            role="alert"
+                            aria-live="assertive">
+                            <span class="cart-list-state-message">{_loadCartsErrorLine1}</span>
+                            <span class="cart-list-state-message">{_loadCartsErrorLine2}</span>
+                        </div>
+                    </template>
+
+                    <!-- Success State -->
+                    <template lwc:elseif={_hasCartsLoaded}>
+                        <template
+                            for:each={_cartMenuItems}
+                            for:item="cart">
+                            <div
+                                key={cart.id}
+                                class="slds-dropdown__item cart-list-item"
+                                role="menuitem"
+                                tabindex="0"
+                                data-value={cart.id}
+                                onclick={handleCartSelect}
+                                onkeydown={handleKeyboardClick}>
+                                <span class="slds-truncate cart-list-item-label">{cart.label}</span>
+                                <site-common-pill
+                                    lwc:if={cart.isDefault}
+                                    label-text={_defaultPillLabel}
+                                    class="cart-list-default-pill"></site-common-pill>
+                            </div>
+                        </template>
+                        <div
+                            class={_viewAllCartsClass}
+                            role="menuitem"
+                            tabindex="0"
+                            data-value="viewAll"
+                            onclick={handleCartSelect}
+                            onkeydown={handleKeyboardClick}>
+                            <span class="slds-truncate">{_viewAllCartsLabel}</span>
+                        </div>
+                    </template>
+                </lightning-button-menu>
+            </span>
+        </template>
+        <template lwc:else>
+            <a
+                onclick={handleCartButtonIconClick}
+                href={_cartPageUrl}>
+                <span
+                    class="slds-icon_container icon-container"
+                    title={iconAssistiveText}>
+                    <svg
+                        tabindex="-1"
+                        class="slds-icon slds-icon-text-default slds-icon_small slds-global-actions__notifications slds-global-actions__item-action"
+                        aria-hidden="true">
+                        <use href={iconUrl}></use>
+                    </svg>
+                    <span class="slds-assistive-text">{iconAssistiveText}</span>
+                </span>
+            </a>
+        </template>
+        <span
+            if:true={showBadge}
+            aria-hidden="true"
+            class="slds-notification-badge show-notification">
+            {badgeItemsCount}
+        </span>
+    </span>
+</template>

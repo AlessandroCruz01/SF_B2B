@@ -1,0 +1,68 @@
+<template lwc:render-mode="light">
+    <div
+        class="quantity-list-container"
+        style={addToCartButtonCssStyles}
+        if:true={isDisplayable}>
+        <div
+            class="quantity-rule"
+            if:true={displayCombinedPurchaseQuantityRule}>
+            <slot name="combinedPurchaseQuantityRuleInfo"></slot>
+        </div>
+        <div class="quantity-list-action">
+            <site-product-add-quantity
+                if:true={displayAddQuantity}
+                class="slds-m-vertical_small"
+                button-text={computedAddToCartButtonText}
+                disabled={isAddToCartButtonDisabled}
+                onvaluechanged={handleQuantityChanged}
+                onaddproducttocart={handleAddToCart}
+                increment-text={purchaseRuleSet.incrementText}
+                minimum-text={purchaseRuleSet.minimumText}
+                maximum-text={purchaseRuleSet.maximumText}
+                quantity={quantity}
+                quantity-selector-label={quantitySelectorLabel}
+                quantity-rule={quantityRule}
+                button-variant="primary"
+                is-out-of-stock={isOutOfStock}
+                out-of-stock-text={outOfStockText}
+                available-quantity={availableQuantity}></site-product-add-quantity>
+            <site-product-configure-button
+                if:true={product}
+                product={product}
+                selected-product-selling-model={selectedProductSellingModel}
+                configure-button-text={configureButtonText}
+                configure-button-background-color={configureButtonBackgroundColor}
+                configure-button-background-hover-color={configureButtonBackgroundHoverColor}
+                configure-button-border-color={configureButtonBorderColor}
+                configure-button-border-radius={configureButtonBorderRadius}
+                configure-button-text-color={configureButtonTextColor}
+                configure-button-text-hover-color={configureButtonTextHoverColor}
+                product-pricing={productPricing}
+                errors={errors}
+                out-of-stock-text={outOfStockText}></site-product-configure-button>
+            <site-common-button-ui
+                if:true={showAddToListButton}
+                disabled={isAddToListButtonDisabled}
+                style={addToWishlistButtonCssStyles}
+                class="slds-m-vertical_small"
+                variant="primary"
+                assistive-text={addToListButtonText}
+                onclick={handleAddToWishlist}>
+                {addToListButtonText}
+            </site-common-button-ui>
+        </div>
+
+        <!--Add to secondary carts menu-->
+        <div
+            class="secondary-cart-menu slds-p-left_small"
+            if:true={displayAddToSecondaryCartMenu}>
+            <site-cart-add-to-secondary-cart
+                disabled={isAddToSecondaryCartMenuDisabled}
+                product-id={productId}
+                product-name={productName}
+                quantity={quantity}
+                show-item-count={showSecondaryCartItemCount}
+                count-type={secondaryCartCountType}></site-cart-add-to-secondary-cart>
+        </div>
+    </div>
+</template>

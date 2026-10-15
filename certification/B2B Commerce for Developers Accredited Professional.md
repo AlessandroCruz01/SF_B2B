@@ -2237,3 +2237,61 @@ Ao analisar um cenário de certificação, considere primeiro estas decisões ar
 ![[mermaid-diagram (38).png]]
 
 Exam trap: Não confunda facilidade de implementação com a melhor decisão arquitetural. Uma solução baseada em Apex ou chamadas REST adicionais pode ser tecnicamente possível, mas ser inferior a uma solução declarativa ou a um Storefront API suportado.
+
+## ⚡ Advanced LWC — Storefront APIs & State Management
+Study objectives:
+- Commerce Storefront APIs
+- Storefront State Management
+- Reactive Cart and Session Data
+- Wire Adapters vs Imperative API Operations
+- Data Consistency and Component Synchronization
+
+### Technical Study — Storefront APIs
+O ponto central do Day 17 é compreender como diferentes LWCs compartilham dados e permanecem sincronizados sem criar requisições redundantes ou manter estados conflitantes.
+
+---
+
+***Three Storefront API mechanisms***
+
+|Mechanism|Primary Responsibility|Typical Use|
+|---|---|---|
+|Wire Adapters|Reactive data retrieval|Manter componentes sincronizados com alterações|
+|Imperative APIs|Explicit operations|Executar uma operação iniciada pelo buyer|
+|Storefront Actions|Context-aware interactions|Encaminhar ações ao Data Provider aplicável|
+
+***Os três mecanismos participam do State Management do Commerce Runtime, mas possuem responsabilidades distintas***
+
+---
+
+### State Management Architecture
+![[mermaid-diagram (39).png]]
+
+***Key principle***: Component synchronization should be managed through the platform's State Management mechanisms rather than independently coordinating every custom LWC.
+
+### Choosing the Correct Data Access Strategy
+For Commerce LWR storefronts, the recommended priority is:
+- Existing OOTB components when sufficient.
+- Data Providers + LWR Expressions for custom components.
+- Commerce Runtime Storefront APIs when provider data is insufficient.
+- Custom Apex Backend-for-Frontend APIs when necessary.
+
+Avoid direct Connect API calls through browser `fetch()` when Commerce Storefront APIs can perform the operation. This preserves supported caching, Commerce security behavior, and coordinated state updates.
+
+#### Commerce Context APIs
+The `commerce/contextApi` module offers:
+
+|API|Responsibility|
+|---|---|
+|`AppContextAdapter`|Reactive application context|
+|`SessionContextAdapter`|Reactive session context|
+|`getAppContext()`|Imperative application-context retrieval|
+|`getSessionContext()`|Imperative session-context retrieval|
+
+A critical exam distinction is that retrieving a context value once is not equivalent to subscribing to reactive context updates.
+
+#### Advanced B2B Considerations
+A buyer switching `effectiveAccount` introduces a context change that can affect entitlements, pricing, and other account-dependent results.
+
+Custom asynchronous operations must also guard against responses from an earlier account context. A response completing later does not make it valid for the current buyer context.
+
+For the exam, distinguish shared Commerce-managed state from component-local temporary state. They should not be treated as interchangeable.
