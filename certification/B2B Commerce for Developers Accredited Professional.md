@@ -5,6 +5,8 @@ tags:
   - certification
   - lwc
 exam: B2B Commerce for Developers Accredited Professional
+github: https://github.com/forcedotcom/commerce-on-lightning-components/tree/release
+forcedotcom: https://github.com/forcedotcom/b2b-commerce-open-source-components
 ---
 
 # B2B Commerce for Developers Accredited Professional
@@ -1587,6 +1589,8 @@ export default class CartTotals extends LightningElement {
 >A propriedade sempre recebe um objeto com este formato:
 >> `{ data: <resultado> | undefined, error: <erro> | undefined }`
 >> Logo depois do componente ser criado, `data` e `error` estão os dois `undefined`. Eles só ganham valor quando o adapter responde.
+>> Nos adapters de Commerce, o código de referência da Salesforce também lê um terceiro campo, `loaded`: `{ data, error, loaded }`.
+>> ⚠️ Como a propriedade é **sempre um objeto**, testar `typeof this.x === 'object'` dá `true` mesmo sem resultado. Teste `this.x?.data`.
 >
 >**Ciclo de vida**
 >> O componente é criado → o LWC instancia o adapter.
@@ -1615,6 +1619,9 @@ product: any;
 - O wire só roda quando todos os parâmetros reativos estão definidos (diferentes de `undefined`).
 
 O `CartSummaryAdapter` não precisa de configuração, por isso o seu código passa só o adapter.
+
+> [!warning] O formato da configuração muda de adapter para adapter
+> O `ProductAdapter` recebe `{ productId }` solto, mas o `ProductSearchAdapter` recebe tudo dentro de `{ searchQuery }`. A documentação oficial não lista esses parâmetros. Veja as tabelas em [[#Configuração do wire por adapter]] e o [[#Estudo de caso — ProductSearchAdapter|estudo de caso do ProductSearchAdapter]].
 
 ##### @Wire em função (quando precisa tratar os dados)
 Em vez de uma propriedade, você pode ligar o wire a um método e transformar o resultado:
@@ -1837,7 +1844,13 @@ Essa ordem reduz duplicação, facilita upgrades e aproveita mecanismos nativos 
 O Data Provider e os Storefront APIs integram componentes personalizados ao comportamento da plataforma, evitando fluxos paralelos desnecessários.
 
 #### Data Access Strategy
-A seleção da fonte de dados é uma das decisões mais importantes de arquitetura.
+A seleção da fonte de dados é uma das decisões mais importantes de arquitetura. A própria Salesforce recomenda esta ordem em [Commerce LWR Storefront Performance Best Practices](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-storefront-performance-best-practices.html): **Data Providers → Storefront APIs no cliente → Apex BFF**.
+
+| Prioridade | Mecanismo                        | Quem busca o dado                        | Use quando                                                     |
+| ---------- | -------------------------------- | ---------------------------------------- | -------------------------------------------------------------- |
+| 1          | Data Providers + LWR Expressions | A **página**                             | O dado já existe no contexto da página                         |
+| 2          | Commerce Storefront APIs         | O **componente**, via runtime de Commerce | O dado não está na página, ou é preciso **executar uma ação** |
+| 3          | Custom Apex BFF                  | O **componente**, via Apex               | Nenhuma das opções anteriores atende                           |
 
 *Priority 1* - **Data Providers + LWR Expressions**
 Use quando as informações já estiverem disponíveis no contexto da página. É a abordagem preferencial, inclusive para dados utilizados em Server-Side Rendering (SSR).
@@ -1855,10 +1868,287 @@ Product page provider    →  {!Product.Details.fields.Name} →  @api productNa
 |**Expression `{!...}`**|O caminho até o dado dentro do provider.|
 |**Propriedade `@api`**|Onde o valor chega no seu LWC.|
 
+##### Onde a expressão fica de fato
+**No componente, a LWR Expression não está no código.** Ela é o valor que a página coloca na propriedade `@api` de fora para dentro.
+
+| Camada                       | O que tem                                                                 | Papel                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `.ts` / `.js`                | `@api productName?: string`                                               | **Recebe** o valor. O componente só diz: "aceito um texto aqui".                |
+| `.js-meta.xml`               | `<property name="productName" default="{!Product.Details.fields.Name}"/>` | **Expõe** a propriedade no Builder e pode deixar a expressão como valor padrão. |
+| Página no Experience Builder | campo "Product Name" = `{!Product.Details.fields.Name}`                   | **É aqui que a expressão fica.** Ela é salva nos metadados da página do site.   |
+
+```txt
+Builder (salvo na página):   productName = "{!Product.Details.fields.Name}"
+                                    │
+               plataforma resolve usando o Data Provider "Product"
+                                    ▼
+Seu componente recebe:       this.productName = "Furadeira X"
+```
+
+O componente **nunca vê** a string `{!...}`, só o valor já resolvido. Pense em uma função: o componente é a função e a expressão é o argumento que a página passa para ela. Por isso, num teste Jest você simula o resultado direto, sem expressão nenhuma:
+
+```typescript
+element.productName = 'Furadeira X';
+```
+
+O mesmo componente pode receber outra coisa em outra página (outra expressão ou um texto fixo como `"Promoção"`) e não percebe a diferença.
+
+##### Exemplo completo
+```xml
+<!-- .js-meta.xml: isExposed=true + targets lightningCommunity__Page / __Default -->
+<targetConfig targets="lightningCommunity__Default">
+    <property name="productName" type="String" label="Product Name"
+              default="{!Product.Details.fields.Name}" />
+</targetConfig>
+```
+
+```typescript
+import { LightningElement, api } from 'lwc';
+
+export default class ProductHeading extends LightningElement {
+    @api productName?: string;
+
+    get hasProductName(): boolean {
+        return typeof this.productName === 'string' && this.productName.length > 0;
+    }
+}
+```
+
+```html
+<template>
+    <template lwc:if={hasProductName}>
+        <h1>{productName}</h1>
+    </template>
+</template>
+```
+
+> [!warning] `{!...}` ≠ `{...}`
+> - `{!Product.Details.fields.Name}` é a **LWR Expression**. Ela fica no Builder e liga a **página ao componente**.
+> - `{productName}` é o **binding de template do LWC**. Ele fica no HTML e liga o **JS ao HTML**.
+
+##### Por que é a Prioridade 1
+- **Nenhuma chamada a mais:** o componente não usa wire, não chama Apex e não faz fetch.
+- **Mesmo dado dos componentes padrão:** preço e nome são os mesmos que os componentes OOTB da página mostram.
+- **Atualiza sozinho:** se o provider muda (por exemplo, o carrinho é atualizado), o `@api` recebe o valor novo e o componente renderiza de novo.
+- **Componente só de exibição:** reaproveitável e fácil de testar. O admin pode ligar outra expressão sem deploy.
+
+##### Limites (quando descer para a Prioridade 2 ou 3)
+| Limite                                                                           | Alternativa                         |
+| -------------------------------------------------------------------------------- | ----------------------------------- |
+| Só funciona na página que tem aquele provider (`Product` não existe no carrinho) | Storefront APIs ou Apex BFF         |
+| Só traz o que o provider expõe; dado customizado ou agregado fica de fora        | Apex BFF                            |
+| Só leitura: não serve para ações como adicionar ao carrinho                      | Storefront APIs (Imperative/Action) |
+| O dado chega de forma assíncrona e pode vir `undefined` no primeiro render       | Getter de guarda (`hasProductName`) |
+
+> [!caution] Não validado na documentação
+> Os caminhos dentro de cada provider (ex.: `Product.Details.fields.Name`) não foram conferidos na documentação oficial. Confirme no Builder antes de usar.
+
 ---
 
-*Priority 2* - **Commerce Storefront APIs**
+*Priority 2* - **[Commerce Storefront APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html)**
 Use quando o Data Provider não fornecer os dados ou o comportamento necessário. O Storefront Runtime oferece mecanismos de caching, buyer entitlements e sincronização de estado.
+
+> Commerce Storefront APIs São módulos JavaScript do runtime de Commerce que você importa direto no LWC de um store LWR (import ... from 'commerce/cartApi').
+
+> Eles são responsáveis por buscar dados do servidor, e não da página. O componente que importa o módulo é quem faz a busca, e não a página.
+
+> Por baixo, eles chamam as Connect REST APIs de Commerce, que já sabem qual é o webstore, a effective account e os entitlements do comprador. Eles também usam o State Management do store: quando um componente muda o carrinho, os outros componentes que leem o carrinho se atualizam sozinhos.
+
+| Tipo                   | Para quê                                                            | Quando roda                                                                                      | Exemplo                        |
+| ---------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------ |
+| **Wire Adapters**      | **Ler** dados (GET)                                                 | Quando o componente carrega ou um parâmetro muda. Atualiza sozinho quando o dado muda.           | `@wire(CartSummaryAdapter)`    |
+| **Imperative APIs**    | **Executar ações** (POST/PUT/PATCH)                                 | Quando você chama, por exemplo num clique de botão                                               | `addItemToCart(...)`           |
+| **Storefront Actions** | Reagir a eventos da tela e avisar os componentes vizinhos em cadeia | No evento. São mais rápidas que ir ao backend, mas podem disparar wires ou chamadas imperativas. | `createCartItemAddAction(...)` |
+
+> **Resumo:** wire para **ler**, imperativo para **fazer**, action para **avisar os vizinhos**.
+
+##### Módulos por área (segundo a documentação)
+Lista da tabela oficial de [Storefront APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html). Os módulos e funções disponíveis mudam conforme a versão da API (a doc vai da 53.0 à 64.0), então confira a versão da sua org.
+
+| Módulo                         | Wire Adapters                                                                                                                                                                                       | Imperative APIs                                                                                                                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commerce/productApi`          | `ProductAdapter`, `ProductCollectionAdapter`, `ProductCategoryAdapter`, `ProductCategoryHierarchyAdapter`, `ProductCategoryPathAdapter`, `ProductChildrenAdapter`, `ProductPricingAdapter`, `ProductSearchAdapter`, `ProductTaxAdapter` | `getProductCollection`, `getProductPricingCollection`, `getProductRecommendations`, `searchProducts`                                                                                            |
+| `commerce/cartApi`             | `CartAdapter`, `CartSummaryAdapter`, `CartItemsAdapter`, `CartStatusAdapter`, `CartCouponsAdapter`, `CartPromotionsAdapter`                                                                         | `addItemToCart`, `addItemsToCart`, `updateItemInCart`, `deleteItemFromCart`, `deleteCurrentCart`, `applyCouponToCart`, `deleteCouponFromCart`, `refreshCartSummary`, `updateCartStatusProcessing` |
+| `commerce/checkoutApi`         | `CheckoutInformationAdapter`, `CheckoutAddressAdapter`, `CheckoutGuestEmailAdapter`                                                                                                                 | `loadCheckout`, `updateShippingAddress`, `updateDeliveryMethod`, `updateContactInformation`, `updateGuestEmail`, `authorizePayment`, `simplePurchaseOrderPayment`, `placeOrder`, `restartCheckout` |
+| `commerce/orderApi`            | `OrderAdapter`, `OrdersAdapter`, `OrderItemsAdapter`, `OrderDeliveryGroupsAdapter`, `OrdersAdjustmentsAdapter`, `OrderItemsAdjustmentsAdapter`, `OrderSummaryLookupAdapter`                         | `startReOrder`, `authorizeOrderSummaryAccess`                                                                                                                                                   |
+| `commerce/wishlistApi`         | `WishlistAdapter`, `WishlistsAdapter`                                                                                                                                                               | `addItemToWishlist`, `addWishlistToCart`, `createWishlist`, `updateWishlist`, `deleteItemFromWishlist`, `deleteWishlist`                                                                        |
+| `commerce/contextApi`          | `AppContextAdapter`, `SessionContextAdapter`                                                                                                                                                        | `getAppContext`, `getSessionContext`                                                                                                                                                            |
+| `commerce/effectiveAccountApi` | —                                                                                                                                                                                                   | `effectiveAccount.update` (troca de conta)                                                                                                                                                      |
+| `commerce/myAccountApi`        | —                                                                                                                                                                                                   | `createMyAccountAddress`, `updateMyAccountAddress`, `deleteMyAccountAddress`, `updateMyAccountProfile`, `resetPassword`                                                                         |
+| `commerce/promotionApi`        | —                                                                                                                                                                                                   | `getPromotionPricingCollection`                                                                                                                                                                 |
+| `commerce/activitiesApi`       | —                                                                                                                                                                                                   | `trackViewProduct`, `trackAddProductToCart`, `trackViewReco`, `trackClickReco` (tracking do Einstein)                                                                                           |
+| `commerce/recommendationsApi`  | `ProductRecommendationsAdapter`*                                                                                                                                                                    | —                                                                                                                                                                                               |
+| `commerce/actionApi`           | —                                                                                                                                                                                                   | Fábricas de **Storefront Actions**: `createCartItemAddAction`, `createCartItemUpdateAction`, `createCartItemDeleteAction`, `createCouponApplyAction`, `createCheckoutPlaceOrderAction`, `createSearchFiltersUpdateAction`, `createWishlistItemAddAction`... |
+| `experience/navigationMenuApi` | `getNavigationMenu`                                                                                                                                                                                 | —                                                                                                                                                                                               |
+| `experience/cmsDeliveryApi`    | `getContent`                                                                                                                                                                                        | —                                                                                                                                                                                               |
+
+\* A própria doc cita dois módulos para esse adapter (`commerce/recommendationsApi` e `commerce/einsteinAPI`). Veja a tabela de divergências abaixo.
+
+> [!warning] Divergências entre a doc e o código de referência da Salesforce
+> | Adapter                                  | Doc                                                    | Código de referência        |
+> | ---------------------------------------- | ------------------------------------------------------ | --------------------------- |
+> | `CartAdapter`, `CartStatusAdapter`       | `commerce/cartApi`                                     | `commerce/checkoutCartApi`  |
+> | `ProductRecommendationsAdapter`          | `commerce/recommendationsApi` ou `commerce/einsteinAPI` | `commerce/productApi`       |
+>
+> Se um import falhar, tente o outro módulo.
+>
+> O código de referência também usa adapters que **não aparecem na tabela da doc**: `ProductPricingCollectionAdapter`, `ProductInventoryLevelsAdapter`, `ProductSearchSuggestionAdapter`, `CartContentsAdapter`, `CheckoutAdapter`, `MyAccountProfileAdapter`, `MyAccountAddressesAdapter`, `ManagedAccountsAdapter`, `PromotionApplicableAdapter`.
+
+##### Configuração do wire por adapter
+> [!important] A documentação não lista os parâmetros dos adapters
+> A tabela oficial só traz o nome, o módulo, a versão e um link para o endpoint REST. **O formato da configuração do `@wire` não está documentado e muda de adapter para adapter.**
+> As tabelas abaixo foram levantadas a partir de todos os `@wire` dos dois repositórios de referência da Salesforce: [b2b-commerce-open-source-components](https://github.com/forcedotcom/b2b-commerce-open-source-components) e [commerce-on-lightning-components](https://github.com/forcedotcom/commerce-on-lightning-components/tree/release).
+
+**Padrão 1: sem configuração (o contexto já basta)**
+
+Todos dizem respeito ao comprador ou à sessão atual, então não precisam de parâmetro.
+
+| Adapter                                         | Módulo (no código de referência) | Config |
+| ----------------------------------------------- | -------------------------------- | ------ |
+| `AppContextAdapter`, `SessionContextAdapter`    | `commerce/contextApi`            | —      |
+| `CartAdapter`, `CartStatusAdapter`, `CheckoutAdapter` | `commerce/checkoutCartApi`  | —      |
+| `MyAccountProfileAdapter`                       | `commerce/myAccountApi`          | —      |
+| `ManagedAccountsAdapter`                        | `commerce/effectiveAccountApi`   | —      |
+
+**Padrão 2: parâmetros soltos (o mais comum)**
+
+| Adapter                            | Módulo                    | Config                                                                         |
+| ---------------------------------- | ------------------------- | ------------------------------------------------------------------------------ |
+| `ProductAdapter`, `ProductTaxAdapter` | `commerce/productApi`  | `{ productId }`                                                                |
+| `ProductPricingAdapter`            | `commerce/productApi`     | `{ productId, allProductSellingModelPrices }`                                  |
+| `ProductPricingCollectionAdapter`  | `commerce/productApi`     | `{ productIds }` (array)                                                       |
+| `ProductInventoryLevelsAdapter`    | `commerce/productApi`     | `{ productIds }` (array)                                                       |
+| `ProductCategoryPathAdapter`       | `commerce/productApi`     | `{ categoryId }`                                                               |
+| `ProductChildrenAdapter`           | `commerce/productApi`     | `{ productId, mediaGroups, pageSize, includeProductSellingModels }`            |
+| `ProductSearchSuggestionAdapter`   | `commerce/productApi`     | `{ searchTerm, includeSuggestedProducts, includeSuggestedTerms, popularCategory }` |
+| `ProductRecommendationsAdapter`    | `commerce/productApi`     | `{ anchorValues, recommender }`                                                |
+| `CartContentsAdapter`              | `commerce/checkoutCartApi` | `{ pageSize }` ou `{ cartId }` (ou sem config)                                |
+| `MyAccountAddressesAdapter`        | `commerce/myAccountApi`   | `{ accountId, addressType, excludeUnsupportedCountries, defaultOnly }`         |
+| `MyAccountAddressDetailAdapter`    | `commerce/myAccountApi`   | `{ addressId }`                                                                |
+| `WishlistsAdapter`                 | `commerce/wishlistApi`    | `{ includeDisplayedList, pageSize, productFields }`                            |
+| `ChildSubscriptionsAdapter`        | `commerce/subscriptionApi` | `{ subscriptionId, effectiveAccountId }`                                      |
+
+**Padrão 3: um objeto embrulhado numa única chave (exceção)**
+
+| Adapter                      | Módulo                 | Config            |
+| ---------------------------- | ---------------------- | ----------------- |
+| `ProductSearchAdapter`       | `commerce/productApi`  | `{ searchQuery }` |
+| `PromotionApplicableAdapter` | `commerce/promotionApi` | `{ cart }`       |
+
+O `ProductSearchAdapter` foge do padrão. O `ProductSearchSuggestionAdapter`, que também é de busca, recebe `searchTerm` solto. Ou seja, **não dá para deduzir o formato pelo nome**.
+
+```typescript
+// Padrão 1: sem config
+@wire(CartStatusAdapter) cartStatus;
+
+// Padrão 2: parâmetros soltos
+@wire(ProductAdapter, { productId: '$recordId' }) product;
+@wire(ProductPricingCollectionAdapter, { productIds: '$productIds' }) prices;
+
+// Padrão 3: objeto embrulhado
+@wire(ProductSearchAdapter, { searchQuery: '$searchQuery' }) searchResult;
+```
+
+**O que se mantém em todos**
+- **`webstoreId` nunca é passado.** O `effectiveAccountId` também quase nunca (a única exceção encontrada é o `commerce/subscriptionApi`). O runtime do store já conhece esse contexto.
+- O **`$`** funciona igual em todos os adapters.
+- Nos exemplos, o resultado vem como **`{ data, error, loaded }`**.
+
+##### Estudo de caso — ProductSearchAdapter
+Na [tabela de Wire Adapters da doc](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html#wire-adapters-in-the-commerce-namespace), o `ProductSearchAdapter` aparece só com módulo (`commerce/productApi`), versão (57.0), descrição ("Retrieves products by search parameters") e um link para o endpoint **Commerce Webstore Product Search**. O erro natural é copiar os parâmetros do endpoint REST para o `@wire`:
+
+```typescript
+// ❌ NÃO FUNCIONA: parâmetros do REST soltos + webstoreId fixo
+@wire(ProductSearchAdapter, { webstoreId: '0ZE...', searchTerm: '$searchTerm', pageSize: 10 })
+productSearchResult?: any;
+
+get hasProductSearchResult(): boolean {
+    // ❌ sempre true: a propriedade do wire é sempre um objeto { data, error, loaded }
+    return typeof this.productSearchResult === 'object' && this.productSearchResult !== null;
+}
+```
+
+O adapter recebe **uma única chave, `searchQuery`**, com os campos do **corpo** do REST dentro dela. O `webstoreId` vem do contexto.
+
+```typescript
+// ✅ Formato usado pelos componentes de referência da Salesforce
+import { LightningElement, api, wire } from 'lwc';
+import { ProductSearchAdapter } from 'commerce/productApi';
+
+export default class ProductSearchList extends LightningElement {
+    @api searchTerm?: string;
+
+    get searchQuery() {
+        return { searchTerm: this.searchTerm, page: 0, pageSize: 10, includePrices: false };
+    }
+
+    @wire(ProductSearchAdapter, { searchQuery: '$searchQuery' })
+    productSearchResult?: { data?: any; error?: any; loaded?: boolean };
+
+    get products(): any[] {
+        return this.productSearchResult?.data?.productsPage?.products ?? [];
+    }
+
+    get hasProductSearchResult(): boolean {
+        return (this.productSearchResult?.data?.productsPage?.total ?? 0) > 0;
+    }
+}
+```
+
+| Campo de `searchQuery` (vistos no código de referência) | Para quê                                  |
+| ------------------------------------------------------- | ----------------------------------------- |
+| `searchTerm`                                            | Termo buscado                             |
+| `categoryId`                                            | Restringe a uma categoria                 |
+| `refinements`                                           | Filtros (facets) aplicados                |
+| `page`, `pageSize`                                      | Paginação (`page` começa em 0)            |
+| `fields`                                                | Campos do produto a retornar              |
+| `grouping`                                              | Agrupamento dos resultados (ex.: `'NoGrouping'`) |
+| `includePrices`, `includeQuantityRule`                  | Incluir preço / regra de quantidade       |
+
+O resultado fica em `data.productsPage.products` e o total em `data.productsPage.total`.
+
+> [!tip] Getter ou setter para montar o `searchQuery`?
+> O getter funciona como parâmetro reativo porque depende do `@api searchTerm` (ainda não testado em org). O código da Salesforce prefere **recriar o objeto num setter**, que é o padrão mais seguro:
+> ```typescript
+> _searchTerm?: string;
+> _searchQuery?: object;
+>
+> @api
+> get searchTerm() { return this._searchTerm; }
+> set searchTerm(value) {
+>     this._searchTerm = value;
+>     this._searchQuery = { searchTerm: value, page: 0, includePrices: false };
+> }
+>
+> @wire(ProductSearchAdapter, { searchQuery: '$_searchQuery' })
+> ```
+> Prefira **recriar o objeto** (como faz o `searchFiltersModalPanel`) em vez de alterar um campo dele. Assim o wire percebe a mudança com certeza.
+
+> [!note] Endpoint REST
+> O link da doc aponta para o endpoint `POST /commerce/webstores/{webstoreId}/search/product-search` ([Commerce Webstore Product Search](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/connect_resources_commerce_webstore_product_search.htm)). Segundo a doc de [Product and Category APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-product-category-apis.html), ele foi substituído pelo `GET` [Commerce Webstore Search Products](https://developer.salesforce.com/docs/atlas.en-us.chatterapi.meta/chatterapi/connect_resources_commerce_webstore_search_products.htm). Use esses endpoints só para conhecer os **nomes dos campos**. O LWC continua usando o adapter.
+
+##### Como descobrir o formato de um adapter
+1. **Doc oficial:** confirme nome, módulo e versão mínima na tabela de [Storefront APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html).
+2. **Código de referência:** procure `@wire(NomeDoAdapter` nos dois repositórios da Salesforce. É a fonte mais confiável para a configuração.
+3. **Endpoint REST** linkado na doc: serve para conhecer os nomes dos campos.
+
+```bash
+# No Windows, core.longpaths evita o erro "Filename too long"
+git -c core.longpaths=true clone --depth 1 https://github.com/forcedotcom/b2b-commerce-open-source-components.git
+git -c core.longpaths=true clone --depth 1 https://github.com/forcedotcom/commerce-on-lightning-components.git
+grep -rn "@wire(ProductSearchAdapter" --include=*.js .
+```
+
+> [!caution] Sem exemplo de referência
+> Adapters como `OrderAdapter` e `CheckoutInformationAdapter` não têm nenhum `@wire` nesses repositórios, então o formato deles não foi confirmado.
+
+##### Fontes
+- [Storefront APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-display-lwc-apis.html): tipos, módulos e lista de adapters
+- [Commerce LWR Storefront Performance Best Practices](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-storefront-performance-best-practices.html): ordem de prioridade
+- [Salesforce Commerce Cart APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-cart-apis.html)
+- [Salesforce Commerce Product and Category APIs](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-d2c-comm-product-category-apis.html)
+- [Public Commerce LWR Library](https://developer.salesforce.com/docs/commerce/salesforce-commerce/guide/b2b-b2c-comm-public-lwr-library.html)
+- Uso real do `ProductSearchAdapter`: [searchFiltersModalPanel.js](https://github.com/forcedotcom/commerce-on-lightning-components/blob/release/force-app/main/default/lwc/searchFiltersModalPanel/searchFiltersModalPanel.js), [topSellers.js](https://github.com/forcedotcom/b2b-commerce-open-source-components/blob/main/force-app/main/default/sfdc_cms__lwc/topSellers/topSellers.js), [orderQuickOrderItem.js](https://github.com/forcedotcom/b2b-commerce-open-source-components/blob/main/force-app/main/default/sfdc_cms__lwc/orderQuickOrderItem/orderQuickOrderItem.js)
 
 ---
 
