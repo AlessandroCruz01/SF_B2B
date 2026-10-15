@@ -271,4 +271,21 @@
     "_bmad/core/resources/excalidraw/validate-json-instructions.md",
     "_bmad/core/resources/excalidraw/README.md",
     "_bmad/core/resources/excalidraw/library-loader.md",
-    "_bmad/core/resources/excalidraw/excalidraw-helpers.m
+    "_bmad/core/resources/excalidraw/excalidraw-helpers.md",
+    "_bmad/core/agents/bmad-master.md",
+    "_bmad/cis/agents/storyteller/storyteller.md",
+    "_bmad/cis/agents/creative-problem-solver.md",
+    "_bmad/cis/agents/design-thinking-coach.md",
+    "_bmad/cis/agents/presentation-master.md",
+    "_bmad/cis/agents/innovation-strategist.md",
+    "_bmad/cis/agents/brainstorming-coach.md",
+    "_bmad/_memory/tech-writer-sidecar/documentation-standards.md",
+    "_bmad/_memory/storyteller-sidecar/story-preferences.md",
+    "_bmad/_memory/storyteller-sidecar/stories-told.md",
+    "_bmad/_config/custom/natura-docs/workflows/natura-code-review/steps/step-06-generate-output.md",
+    "_bmad/_config/custom/natura-docs/workflows/natura-code-review/templates/review-report-template.md",
+    "_bmad/_config/custom/natura-docs/workflows/natura-code-review/steps/step-07a-present-summary.md",
+    "_bmad/_config/custom/natura-docs/workflows/natura-code-review/steps/step-07b-final-decision.md",
+    "_bmad/_config/custom/natura-docs/workflows/natura-code-review/steps/step-07-auto-fix-opportunities.md"
+  ]
+}
