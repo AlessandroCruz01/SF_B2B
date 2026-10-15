@@ -1814,3 +1814,136 @@ Essa integração de estado é uma diferença importante em relação a tratar c
 |Component missing from Builder|Check `isExposed`, targets and runtime requirements|
 
 Regra fundamental do Day 15: Commerce-native first. Escolha uma solução que preserve buyer context, platform security, caching e storefront consistency antes de criar mecanismos customizados.
+
+## ⚡ Advanced LWC — Custom Commerce Component Architecture
+Hoje, nosso objetivo é compreender como projetar componentes personalizados para storefronts B2B Commerce, considerando arquitetura, responsabilidades, reatividade, integração com Commerce APIs e manutenção.
+
+### Custom Commerce Component Architecture
+#### Architecture: Standard vs Custom
+Em um storefront B2B Commerce desenvolvido com Lightning Web Runtime (LWR), o arquiteto deve priorizar componentes padrão e utilizar custom LWCs quando houver requisitos não atendidos.
+
+| Requirement                                                         | Preferred Architecture          |
+| ------------------------------------------------------------------- | ------------------------------- |
+| Ajustar aparência de um componente existente                        | OOTB Component + supported CSS  |
+| Criar uma funcionalidade visual não disponível                      | Focused Custom LWC              |
+| Consumir informações disponíveis na página                          | Data Provider + LWR Expressions |
+| Acessar Commerce data sem Data Provider adequado                    | Storefront APIs                 |
+| Implementar lógica de backend não suportada pelas opções anteriores | Custom Apex BFF                 |
+
+Essa ordem reduz duplicação, facilita upgrades e aproveita mecanismos nativos de cache, segurança e reatividade.
+
+#### Architectural Layers
+![[mermaid-diagram (37).png]]
+O Data Provider e os Storefront APIs integram componentes personalizados ao comportamento da plataforma, evitando fluxos paralelos desnecessários.
+
+#### Data Access Strategy
+A seleção da fonte de dados é uma das decisões mais importantes de arquitetura.
+
+*Priority 1* - **Data Providers + LWR Expressions**
+Use quando as informações já estiverem disponíveis no contexto da página. É a abordagem preferencial, inclusive para dados utilizados em Server-Side Rendering (SSR).
+	*LWR Expressions*: **LWR Expressions** são marcações no formato `{!...}` que você coloca **nas propriedades de um componente, dentro do Experience Builder**. Na hora de renderizar a página, a plataforma troca a expressão pelo dado real que vem de um **Data Provider** daquela página. O componente não sai buscando o dado. A página entrega o dado pronto para ele. As três peças:
+```txt
+Data Provider            →  LWR Expression              →  @api property do componente
+(o dado da página)          (o "endereço" do dado)         (quem recebe)
+
+Product page provider    →  {!Product.Details.fields.Name} →  @api productName
+```
+
+|Peça|Papel|
+|---|---|
+|**Data Provider**|Fonte de dados disponível naquela página. Exemplo: a página de produto tem os dados do produto que está sendo exibido.|
+|**Expression `{!...}`**|O caminho até o dado dentro do provider.|
+|**Propriedade `@api`**|Onde o valor chega no seu LWC.|
+
+---
+
+*Priority 2* - **Commerce Storefront APIs**
+Use quando o Data Provider não fornecer os dados ou o comportamento necessário. O Storefront Runtime oferece mecanismos de caching, buyer entitlements e sincronização de estado.
+
+---
+
+*Priority 3* - **Custom Apex Backend For Frontend (BFF)**
+Reserve para operações específicas que não possam ser resolvidas adequadamente pelos mecanismos anteriores. Minimize chamadas de rede e implemente controles apropriados de acesso e caching.
+
+Uma implementação que recupera diretamente dados comerciais por `fetch()` usando Connect APIs pode funcionar em determinados contextos, mas não é o padrão recomendado para custom Commerce LWCs.
+
+#### Component Responsibilities & Communication
+Uma arquitetura bem organizada separa responsabilidades:
+
+|Layer|Responsibility|
+|---|---|
+|Presentation|Exibir valores, estados de loading e erros|
+|Component Logic|Validar inputs, controlar interações e coordenar operações|
+|Commerce Integration|Consumir dados e executar ações por meio dos Storefront APIs|
+|Commerce State|Manter o estado compartilhado sincronizado com outros componentes|
+|Backend|Aplicar regras de negócio, segurança e processamento server-side|
+**Important distinction:** `CustomEvent` resolve comunicação entre componentes LWC, mas não substitui uma Commerce API. Disparar um evento customizado não atualiza automaticamente o cart ou os dados gerenciados pelo Commerce State Management.
+
+Também é importante evitar duplicar o mesmo estado em componentes independentes. Para informações compartilhadas do Commerce, prefira a fonte de estado fornecida pela plataforma.
+
+#### Experience Builder Metadata
+Um custom LWC precisa estar configurado corretamente para ser disponibilizado no Experience Builder.
+
+O exemplo abaixo apresenta um componente arrastável com uma propriedade editável:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="heading"
+                type="String"
+                label="Heading"
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
+```
+
+E na classe JavaScript:
+```typescript
+import { LightningElement, api } from 'lwc';
+
+export default class CommerceBanner extends LightningElement {
+    @api heading;
+}
+```
+
+`lightningCommunity__Page` permite inserir o componente na página. `lightningCommunity__Default` define as propriedades configuráveis no Experience Builder. A propriedade declarada no metadata deve corresponder à propriedade pública do LWC.
+
+#### Asynchronous Expressions & SSR
+Um erro comum em custom Commerce components é presumir que valores recebidos por expressions estejam disponíveis imediatamente.
+
+Exemplo:
+```typescript
+import { LightningElement, api } from 'lwc';
+
+export default class ProductBadge extends LightningElement {
+    @api product;
+
+    get productName() {
+        return this.product?.name ?? 'Loading...';
+    }
+
+    get hasProduct() {
+        return Boolean(this.product?.id);
+    }
+}
+```
+
+O componente deve aceitar a ausência inicial dos dados e reagir quando as propriedades públicas forem atualizadas.
+
+Para componentes que participam do Server-Side Rendering, as funções executadas no servidor não podem depender incondicionalmente de APIs exclusivas do navegador, como `window` e `document`. O código SSR deve ser portátil e as operações browser-only precisam ser isoladas do caminho de execução no servidor.
+
+#### Exam Decision Framework
+Ao analisar um cenário de certificação, considere primeiro estas decisões arquiteturais:
+
+![[mermaid-diagram (38).png]]
+
+Exam trap: Não confunda facilidade de implementação com a melhor decisão arquitetural. Uma solução baseada em Apex ou chamadas REST adicionais pode ser tecnicamente possível, mas ser inferior a uma solução declarativa ou a um Storefront API suportado.
