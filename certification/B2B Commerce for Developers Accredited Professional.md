@@ -2253,13 +2253,26 @@ O ponto central do Day 17 é compreender como diferentes LWCs compartilham dados
 
 ***Three Storefront API mechanisms***
 
-|Mechanism|Primary Responsibility|Typical Use|
-|---|---|---|
-|Wire Adapters|Reactive data retrieval|Manter componentes sincronizados com alterações|
-|Imperative APIs|Explicit operations|Executar uma operação iniciada pelo buyer|
-|Storefront Actions|Context-aware interactions|Encaminhar ações ao Data Provider aplicável|
+| Mechanism          | Primary Responsibility     | Typical Use                                     |
+| ------------------ | -------------------------- | ----------------------------------------------- |
+| Wire Adapters      | Reactive data retrieval    | Manter componentes sincronizados com alterações |
+| Imperative APIs    | Explicit operations        | Executar uma operação iniciada pelo buyer       |
+| Storefront Actions | Context-aware interactions | Encaminhar ações ao Data Provider aplicável     |
 
 ***Os três mecanismos participam do State Management do Commerce Runtime, mas possuem responsabilidades distintas***
+
+**Wire Adapters**
+
+|Finalidade|Como o wire resolve|
+|---|---|
+|**Ler dados para exibir**|O framework busca o dado ao conectar o componente e entrega `{ data, error }`|
+|**Ficar sincronizado**|Quando o estado do Commerce muda, todo componente inscrito recebe o novo valor|
+|**Reagir a parâmetros**|Com `'$prop'`, o wire roda de novo quando a propriedade muda|
+|**Evitar estado duplicado**|O dado fica no Commerce State; seu componente só observa|
+|**Respeitar o contexto do comprador**|Os dados chegam já de acordo com os entitlements, os preços e a account do comprador|
+
+
+
 
 ---
 
