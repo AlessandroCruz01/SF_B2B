@@ -2,8 +2,9 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>67.0</apiVersion>
     <isExposed>true</isExposed>
-    <masterLabel>( Advanced LWC ) Storefront APIs & State Management - Wire Adapters</masterLabel>
-    <targetConfigs>
-        
-    </targetConfigs>
+    <masterLabel>( Advanced LWC ) Storefront APIs and State Management - Wire Adapters</masterLabel>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
 </LightningComponentBundle>
